@@ -1,64 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:pi/routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pi/routes.dart';
 
-class ScaffoldBase extends StatefulWidget{
+class ScaffoldBase extends StatefulWidget {
   final Widget body;
   final String title;
+  final bool mostrarIcone;
 
-  ScaffoldBase({required this.body, required this.title});
-  
+  ScaffoldBase({required this.body, required this.title, this.mostrarIcone = true});
+
   @override
-   _ScaffoldBase createState()=> _ScaffoldBase();
-  
+  _ScaffoldBaseState createState() => _ScaffoldBaseState();
 }
 
-class _ScaffoldBase extends State<ScaffoldBase>{
+class _ScaffoldBaseState extends State<ScaffoldBase> {
   late String _title;
+  late bool _isLoggedIn;
 
-  @override void initState() {
+  @override
+  void initState() {
     super.initState();
     _title = widget.title;
+    _checkLoggedInStatus();
   }
 
-  Future<String> getUsername() async{
+  Future<void> _checkLoggedInStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? username = prefs.getString('login');
-    return username ?? "ABF Informática";
-  }
-
-  void updateTitle(String newtitle){
     setState(() {
-      _title = newtitle;
+      _isLoggedIn = prefs.getString('jwt_token') != null;
+    });
+  }
+  void updateTitle(String newTitle) {
+    setState(() {
+      _title = newTitle;
     });
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: FutureBuilder<String>(
-          future: getUsername(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            } else {
-              return Text(_title);
-            }
-          },
-      ),
-      actions: [
+        title: Text(_title),
+        actions: widget.mostrarIcone
+     && _isLoggedIn ? [
           IconButton(
             iconSize: 40,
             icon: const Icon(Icons.person),
-            onPressed: () async {             
+            onPressed: () async {
               SharedPreferences prefs = await SharedPreferences.getInstance();
-              await prefs.remove('jwt_token'); 
+              await prefs.remove('jwt_token');
+              
               Get.offAllNamed(Routes.login);
-            }
+            },
           ),
-        ],
+        ] : null,
       ),
       body: widget.body,
     );

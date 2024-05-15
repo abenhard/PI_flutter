@@ -13,6 +13,7 @@ void main() async {
 
   if (token != null && !JwtDecoder.isExpired(token)) {
     Map<String, dynamic> decodedToken = JwtDecoder.decode(token);
+    //prefs.setString('login', decodedToken['Login']);
     String userAuthority = decodedToken['ROLE'];
     switch (userAuthority) {
       case 'ADMIN':
@@ -28,9 +29,8 @@ void main() async {
         initialRoute = Routes.login;
     }
   }
-  runApp(MaterialApp(
-    home: MyApp(initialRoute: initialRoute),
-  ));
+
+  runApp(MyApp(initialRoute: initialRoute));
 }
 
 class MyApp extends StatelessWidget {
@@ -44,27 +44,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(useMaterial3: true),
       initialRoute: initialRoute,
       getPages: Routes.pages,
-      home: FutureBuilder<String>(
-        future: getUsername(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
-          } else {
-            return Scaffold(
-              appBar: AppBar(
-                title: Text(snapshot.data ?? "ABF Informática"),
-              ),
-              body: GetRouterOutlet(initialRoute: initialRoute),
-            );
-          }
-        },
-      ),
     );
-  }
-
-  Future<String> getUsername() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? username = prefs.getString('login');
-    return username ?? "ABF Informática";
   }
 }

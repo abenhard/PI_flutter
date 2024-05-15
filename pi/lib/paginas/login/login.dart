@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:pi/routes.dart';
 import 'package:pi/url.dart';
+import 'package:pi/widgets/scaffold_base.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -112,8 +113,8 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
+    return ScaffoldBase(
+      title: "Login",
         body: SingleChildScrollView(
           child: Form(
             key: _formKey,
@@ -178,7 +179,6 @@ class _LoginState extends State<Login> {
             ),
           ),
         ),
-      ),
     );
   }
 }

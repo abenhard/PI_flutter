@@ -11,7 +11,6 @@ import 'package:pi/widgets/telefone_residencial.dart';
 import 'package:pi/widgets/textFormFieldGenerico.dart';
 import 'package:pi/widgets/whatsapp.dart';
 
-
 class CadastroDeCliente extends StatefulWidget {
   const CadastroDeCliente({Key? key}) : super(key: key);
 
@@ -21,23 +20,18 @@ class CadastroDeCliente extends StatefulWidget {
 
 class _CadastroDeClienteState extends State<CadastroDeCliente> {
   final _formKey = GlobalKey<FormState>();
-
-  
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _telefoneController = TextEditingController();
   final TextEditingController _whatsappController = TextEditingController();
   final TextEditingController _cpfController = TextEditingController();
-
   final TextEditingController _ruaController = TextEditingController();
   final TextEditingController _bairroController = TextEditingController();
   final TextEditingController _complementoController = TextEditingController();
   final TextEditingController _cepController = TextEditingController();
   final TextEditingController _numeroController = TextEditingController();
   final TextEditingController _cidadeController = TextEditingController();
-
   String? _estadoSelecionado;
-
   bool _showEndereco = false;
 
   @override
@@ -47,14 +41,12 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
     _telefoneController.dispose();
     _whatsappController.dispose();
     _cpfController.dispose();
-
     _ruaController.dispose();
     _bairroController.dispose();
     _numeroController.dispose();
     _cepController.dispose();
     _cidadeController.dispose();
     _complementoController.dispose();
-
     super.dispose();
   }
 
@@ -81,7 +73,7 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
         'email': _emailController.text,
         'telefone': _telefoneController.text,
         'whatsapp': _whatsappController.text,
-        'cpf': _cpfController.text
+        'cpf': _cpfController.text,
       },
       'enderecoDTO': {
         'cpf': _cpfController.text,
@@ -107,7 +99,6 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
   Widget build(BuildContext context) {
     return ScaffoldBase(
       title: 'Cadastro de Cliente',
-
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -121,7 +112,7 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
               WhatsApp(_whatsappController),
               CPF(controller: _cpfController),
               //-----Endereço-----//
-              SizedBox(height: 10,),
+              const SizedBox(height: 10,),
               ExpansionPanelList(
                 expansionCallback: (int index, bool isExpanded) {
                   setState(() {
@@ -144,10 +135,10 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
                       children: [
                         CEP(_cepController),
                         TextFormFieldGenerico(_numeroController, 'Numero', 'Por favor insira o numero da residência'),
-                        TextFormFieldGenerico(_ruaController, 'Rua', 'Por favor, Insira o nome da rua'),
-                        TextFormFieldGenerico(_bairroController, 'Bairro', 'Por favor, Insira o nome do Bairro'),
-                        TextFormFieldGenerico(_complementoController, 'Complemento', 'Por favor, Insira o complemento (Opcional)'),
-                        TextFormFieldGenerico(_cidadeController, 'Cidade', 'Por favor, Insira o nome da Cidade'),
+                        TextFormFieldGenerico(_ruaController, 'Rua', 'Por favor, insira o nome da rua'),
+                        TextFormFieldGenerico(_bairroController, 'Bairro', 'Por favor, insira o nome do Bairro'),
+                        TextFormFieldGenerico(_complementoController, 'Complemento', 'Por favor, insira o complemento (Opcional)'),
+                        TextFormFieldGenerico(_cidadeController, 'Cidade', 'Por favor, insira o nome da Cidade'),
                         EstadoDropdown(
                           onChanged: (newValue) {
                             setState(() {
@@ -171,14 +162,6 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
           ),
         ),
       ),
-    );
-  }
-
-  TextFormField optionalBuildTextFormField(TextEditingController controller, String label, [TextInputType keyboardType = TextInputType.text]) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(labelText: label),
-      keyboardType: keyboardType,
     );
   }
 }

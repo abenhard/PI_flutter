@@ -9,7 +9,7 @@ import 'package:pi/widgets/cep.dart';
 import 'package:pi/widgets/cpf.dart';
 import 'package:pi/widgets/email.dart';
 import 'package:pi/widgets/estado.dart';
-import 'package:pi/widgets/telefoneResidencial.dart';
+import 'package:pi/widgets/telefone_residencial.dart';
 import 'package:pi/widgets/textFormFieldGenerico.dart';
 import 'package:pi/widgets/whatsapp.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -38,40 +38,40 @@ class AdminTelaInicial extends StatelessWidget {
                   Get.toNamed(Routes.consultaDeOrdemDeServico);
                 },
                 corBotao: Colors.lightBlue,
-              ), 
+              ),
               const SizedBox(height: 15,),
               BotaoFactory(
-                texto: 'Cadastro de Cliente', 
-                onPressed: (){
+                texto: 'Cadastro de Cliente',
+                onPressed: () {
                   print('Cadastro de Cliente');
                   Get.toNamed(Routes.cadastroDeCliente);
-                }, 
+                },
                 corBotao: Color.fromARGB(255, 27, 119, 194),
               ),
               const SizedBox(height: 15,),
               BotaoFactory(
-                texto: 'Cadastro de Funcionário', 
-                onPressed: (){
+                texto: 'Cadastro de Funcionário',
+                onPressed: () {
                   print('Cadastro de Funcionário');
                   Get.toNamed(Routes.cadastroDeFuncionario);
-                }, 
+                },
                 corBotao: Color.fromARGB(255, 27, 119, 194),
               ),
               const SizedBox(height: 15,),
               BotaoFactory(
-                texto: 'Cadastro de Ordem de Serviço', 
-                onPressed: (){
+                texto: 'Cadastro de Ordem de Serviço',
+                onPressed: () {
                   print('Cadastro de Ordem de Serviço');
                   Get.toNamed(Routes.cadastroDeOrdemDeServico);
-                }, 
+                },
                 corBotao: Color.fromARGB(255, 27, 119, 194),
-              ), 
+              ),
               const SizedBox(height: 15,),
               BotaoFactory(
-                texto: 'Gerar Relatório', 
-                onPressed: (){
+                texto: 'Gerar Relatório',
+                onPressed: () {
                   print('Gerar Relatório');
-                }, 
+                },
                 corBotao: Color.fromARGB(255, 235, 123, 18),
               ),
             ],
