@@ -11,19 +11,30 @@ class BackendUrls {
 
   String httpBase = 'http://192.168.100.3:8080/PI_Backend/';
   
-  String login = 'login';
-  String pessoa = 'pessoa';
-  String funcionario = 'funcionario';
-
   String getLogin() {
-    return '$httpBase$login';
+    return '$httpBase' + 'login';
   }
 
   String getPessoa() {
-    return '$httpBase$pessoa';
+    return '$httpBase' + 'pessoa';
+  }
+  String getPessoaCPF(String cpf){
+    return '$httpBase' + 'pessoa/$cpf';
   }
 
   String getFuncionario() {
-    return '$httpBase$funcionario';
+    return '$httpBase' + 'funcionario';
+  }
+  String getCadastrarFuncionario(){
+    return  getFuncionario() + '/cadastrar';
+  }
+  String getOrdem(){
+    return  '$httpBase' + 'ordem';
+  }
+  String getCadastrarOrdemAtendente(){
+    return getOrdem() + '/cadastroPorAtendente';
+  }
+  String getCadastrarOrdemTecnico(){
+     return getOrdem() + '/cadastroPorTecnico';
   }
 }

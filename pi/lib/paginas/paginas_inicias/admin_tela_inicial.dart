@@ -2,30 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pi/factories/botao_factory.dart';
 import 'package:pi/routes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pi/widgets/scaffold_base.dart';
 
 class AdminTelaInicial extends StatelessWidget {
   const AdminTelaInicial({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Admin'),
-        actions: [
-          IconButton(
-            iconSize: 40,
-            icon: const Icon(Icons.person),
-            onPressed: () async {
-              // Clear token from SharedPreferences
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              await prefs.remove('jwt_token');
-              // Navigate to login screen
-              Get.offAllNamed(Routes.login);
-            }
-          ),
-        ],
-      ),
+    return ScaffoldBase(
+      title: 'Tela Inicial',
       body: SingleChildScrollView(
         child: Center(
           child: Column(

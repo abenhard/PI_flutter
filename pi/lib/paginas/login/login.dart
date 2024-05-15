@@ -29,7 +29,7 @@ class _LoginState extends State<Login> {
 
     if (_formKey.currentState!.validate()) {
       setState(() {
-        isLoading = true; // Ativar indicador de progresso
+        isLoading = true; 
       });
 
       String login = _loginController.text.trim();
