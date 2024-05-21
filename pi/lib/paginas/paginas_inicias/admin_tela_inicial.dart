@@ -62,7 +62,7 @@ class AdminTelaInicial extends StatelessWidget {
                 texto: 'Cadastro de Ordem de Serviço',
                 onPressed: () {
                   print('Cadastro de Ordem de Serviço');
-                  Get.toNamed(Routes.cadastroDeOrdemDeServico);
+                  Get.toNamed(Routes.cadastroDeOrdemDeServicoAtendente);
                 },
                 corBotao: Color.fromARGB(255, 27, 119, 194),
               ),

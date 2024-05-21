@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 import 'package:pi/paginas/login/login.dart';
 import 'package:pi/paginas/paginas_cadastros/cadastro_de_cliente.dart';
 import 'package:pi/paginas/paginas_cadastros/cadastro_de_funcionario.dart';
-import 'package:pi/paginas/paginas_cadastros/cadastro_de_ordem_de_servico.dart';
+import 'package:pi/paginas/paginas_cadastros/cadastro_de_ordem_de_servico_atendente.dart';
 import 'package:pi/paginas/paginas_consultas/consulta_de_cliente.dart';
 import 'package:pi/paginas/paginas_consultas/consulta_de_funcionario.dart';
 import 'package:pi/paginas/paginas_consultas/consulta_de_ordem_de_servico.dart';
@@ -20,7 +20,7 @@ class Routes {
   static const String consultaDeOrdemDeServico = '/consulta_de_ordem_de_servico';
   static const String cadastroDeCliente = '/cadastro_de_cliente';
   static const String cadastroDeFuncionario = '/cadastro_de_funcionario';
-  static const String cadastroDeOrdemDeServico = '/cadastro_de_ordem_de_servico';
+  static const String cadastroDeOrdemDeServicoAtendente = '/cadastro_de_ordem_de_servico_atendente';
 
   static final List<GetPage> pages = [
     GetPage(name: login, page: () => Login()),
@@ -32,6 +32,6 @@ class Routes {
     GetPage(name: consultaDeOrdemDeServico, page: () => ConsultaDeOrdemDeServico()),
     GetPage(name: cadastroDeCliente, page: () => CadastroDeCliente()),
     GetPage(name: cadastroDeFuncionario, page: () => CadastroDeFuncionario()),
-    GetPage(name: cadastroDeOrdemDeServico, page: () => CadastroDeOrdemDeServico()),
+    GetPage(name: cadastroDeOrdemDeServicoAtendente, page: () => CadastroDeOrdemDeServicoAtendente()),
   ];
 }

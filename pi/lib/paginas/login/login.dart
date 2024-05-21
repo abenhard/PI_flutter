@@ -30,7 +30,7 @@ class _LoginState extends State<Login> {
 
     if (_formKey.currentState!.validate()) {
       setState(() {
-        isLoading = true; 
+        isLoading = true;
       });
 
       String login = _loginController.text.trim();
@@ -51,9 +51,14 @@ class _LoginState extends State<Login> {
         if (!mounted) return;
 
         if (response.statusCode == 200) {
-          String token = response.body;
+          var responseData = jsonDecode(response.body);
+          String token = responseData['token'];
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('jwt_token', token);
+          print('Login: $login');
+          await prefs.setString('login', login);
+          String? test = prefs.getString('login');
+          print("Login saved in SharedPreferences: $test");
 
           if (JwtDecoder.isExpired(token)) {
             _scaffoldKey.currentState?.showSnackBar(
@@ -84,16 +89,14 @@ class _LoginState extends State<Login> {
                 break;
               default:
                 _scaffoldKey.currentState?.showSnackBar(
-                  const SnackBar(content: Text('No valid ROLE found')),
+                  const SnackBar(content: Text('ROLE Inválida')),
                 );
             }
-
-            // Após definir a nova rota inicial, navegue para ela
             Navigator.pushReplacementNamed(context, initialRoute);
           }
         } else {
           _scaffoldKey.currentState?.showSnackBar(
-            SnackBar(content: Text('Login failed: ${response.statusCode}')),
+            SnackBar(content: Text('Login falhou: ${response.statusCode}')),
           );
         }
       } catch (error) {
@@ -101,11 +104,11 @@ class _LoginState extends State<Login> {
 
         print('Error: $error');
         _scaffoldKey.currentState?.showSnackBar(
-          SnackBar(content: Text('An error occurred')),
+          SnackBar(content: Text('Ocorreu um Erro')),
         );
       } finally {
         setState(() {
-          isLoading = false; // Desativar indicador de progresso
+          isLoading = false;
         });
       }
     }
@@ -114,71 +117,70 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return ScaffoldBase(
-      title: "Login",
-        body: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: <Widget>[
-                Center(
-                  child: SizedBox(
-                    width: 300,
-                    height: 300,
-                    child: Image.asset('assets/imagens/logo.png'),
-                  ),
+      title: "",
+      body: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              Center(
+                child: SizedBox(
+                  width: 300,
+                  height: 300,
+                  child: Image.asset('assets/imagens/logo.png'),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: TextFormField(
-                    controller: _loginController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Login Incorreto';
-                      }
-                      return null;
-                    },
-                    decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Login',
-                        hintText: 'Digite seu Login'),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 40, vertical: 20),
-                  child: TextFormField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Senha Incorreta';
-                      }
-                      return null;
-                    },
-                    decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'Senha',
-                        hintText: 'Digite sua senha'),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    print('Tela Esqueceu a Senha');
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: TextFormField(
+                  controller: _loginController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Login Incorreto';
+                    }
+                    return null;
                   },
-                  child: const Text('Esqueci a senha',
-                      style: TextStyle(color: Colors.blue, fontSize: 18)),
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Login',
+                      hintText: 'Digite seu Login'),
                 ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: isLoading ? null : _login, // Desativar o botão durante o carregamento
-                  child: isLoading
-                      ? CircularProgressIndicator() // Mostrar indicador de progresso
-                      : const Text('Login'),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                child: TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Senha Incorreta';
+                    }
+                    return null;
+                  },
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Senha',
+                      hintText: 'Digite sua senha'),
                 ),
-              ],
-            ),
+              ),
+              TextButton(
+                onPressed: () {
+                  print('Tela Esqueceu a Senha');
+                },
+                child: const Text('Esqueci a senha',
+                    style: TextStyle(color: Colors.blue, fontSize: 18)),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: isLoading ? null : _login,
+                child: isLoading
+                    ? CircularProgressIndicator()
+                    : const Text('Login'),
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 }

@@ -1,18 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:pi/routes.dart';
 import 'package:pi/url.dart';
-import 'package:pi/widgets/cargo.dart';
-import 'package:pi/widgets/cep.dart';
-import 'package:pi/widgets/cpf.dart';
-import 'package:pi/widgets/email.dart';
-import 'package:pi/widgets/estado.dart';
-import 'package:pi/widgets/telefone_residencial.dart';
+import 'package:pi/widgets/cadastro/cargo.dart';
+import 'package:pi/widgets/endereco/cep.dart';
+import 'package:pi/widgets/cadastro/cpf.dart';
+import 'package:pi/widgets/cadastro/email.dart';
+import 'package:pi/widgets/endereco/estado.dart';
+import 'package:pi/widgets/scaffold_base.dart';
+import 'package:pi/widgets/cadastro/telefone_residencial.dart';
 import 'package:pi/widgets/textFormFieldGenerico.dart';
 import 'package:pi/widgets/whatsapp.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CadastroDeFuncionario extends StatefulWidget {
   const CadastroDeFuncionario({Key? key}) : super(key: key);
@@ -122,23 +120,8 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Cadastro de Funcionário'),
-        actions: [
-          IconButton(
-            iconSize: 40,
-            icon: const Icon(Icons.person),
-            onPressed: () async {
-              // Clear token from SharedPreferences
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              await prefs.remove('jwt_token');
-              // Navigate to login screen
-              Get.offAllNamed(Routes.login);
-            },
-          ),
-        ],
-      ),
+    return ScaffoldBase(
+      title: 'Cadastro de Funcionário',
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

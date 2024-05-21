@@ -15,18 +15,21 @@ class BackendUrls {
     return '$httpBase' + 'login';
   }
 
-  String getPessoa() {
+  String getPessoas() {
     return '$httpBase' + 'pessoa';
   }
   String getPessoaCPF(String cpf){
     return '$httpBase' + 'pessoa/$cpf';
   }
 
-  String getFuncionario() {
+  String getFuncionarios() {
     return '$httpBase' + 'funcionario';
   }
+  String getTecnicos(){
+     return '$httpBase' + 'funcionario/tecnicos';
+  }
   String getCadastrarFuncionario(){
-    return  getFuncionario() + '/cadastrar';
+    return  getFuncionarios() + '/cadastrar';
   }
   String getOrdem(){
     return  '$httpBase' + 'ordem';
@@ -36,5 +39,9 @@ class BackendUrls {
   }
   String getCadastrarOrdemTecnico(){
      return getOrdem() + '/cadastroPorTecnico';
+  }
+  String getOrdemServicoTecnico()
+  {
+     return getOrdem() + '/funcionario/tecnico';
   }
 }

@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pi/url.dart';
-import 'package:pi/widgets/cep.dart';
-import 'package:pi/widgets/cpf.dart';
-import 'package:pi/widgets/email.dart';
-import 'package:pi/widgets/estado.dart';
+import 'package:pi/widgets/endereco/cep.dart';
+import 'package:pi/widgets/cadastro/cpf.dart';
+import 'package:pi/widgets/cadastro/email.dart';
+import 'package:pi/widgets/endereco/estado.dart';
 import 'package:pi/widgets/scaffold_base.dart';
-import 'package:pi/widgets/telefone_residencial.dart';
+import 'package:pi/widgets/cadastro/telefone_residencial.dart';
 import 'package:pi/widgets/textFormFieldGenerico.dart';
 import 'package:pi/widgets/whatsapp.dart';
 
@@ -87,7 +87,7 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
       }
     };
     return http.post(
-      Uri.parse(BackendUrls().getPessoa()),
+      Uri.parse(BackendUrls().getPessoas()),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
