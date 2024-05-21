@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pi/factories/botao_factory.dart';
 import 'package:pi/url.dart';
 import 'package:pi/widgets/scaffold_base.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -108,6 +109,12 @@ class _TecnicoTelaInicialState extends State<TecnicoTelaInicial> with SingleTick
               ],
             ),
           ),
+          BotaoFactory(
+              texto: 'Consultar de Ordem de Serviço', 
+              onPressed: (){print('Consultar de Ordem de Serviço');}, 
+              corBotao: Colors.lightBlue,
+              ),
+          SizedBox(height: 20,),
         ],
       ),
     );
