@@ -10,6 +10,7 @@ import 'package:pi/widgets/scaffold_base.dart';
 import 'package:pi/widgets/cadastro/telefone_residencial.dart';
 import 'package:pi/widgets/textFormFieldGenerico.dart';
 import 'package:pi/widgets/whatsapp.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CadastroDeCliente extends StatefulWidget {
   const CadastroDeCliente({Key? key}) : super(key: key);
@@ -66,7 +67,7 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
     }
   }
 
-  Future<http.Response> registrarPessoa() {
+  Future<http.Response> registrarPessoa() async {
     final pessoaEnderecoDTO = {
       'pessoaDTO': {
         'nome': _nomeController.text,
@@ -86,10 +87,15 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
         'estado': _estadoSelecionado,
       }
     };
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('jwt_token');
+
     return http.post(
       Uri.parse(BackendUrls().getPessoas()),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
       },
       body: jsonEncode(pessoaEnderecoDTO),
     );

@@ -43,7 +43,7 @@ class AdminTelaInicial extends StatelessWidget {
               BotaoFactory(
                 texto: 'Cadastro de Cliente',
                 onPressed: () {
-                  print('Cadastro de Cliente');
+                 
                   Get.toNamed(Routes.cadastroDeCliente);
                 },
                 corBotao: Color.fromARGB(255, 27, 119, 194),
@@ -52,7 +52,7 @@ class AdminTelaInicial extends StatelessWidget {
               BotaoFactory(
                 texto: 'Cadastro de Funcionário',
                 onPressed: () {
-                  print('Cadastro de Funcionário');
+                  
                   Get.toNamed(Routes.cadastroDeFuncionario);
                 },
                 corBotao: Color.fromARGB(255, 27, 119, 194),
@@ -61,7 +61,7 @@ class AdminTelaInicial extends StatelessWidget {
               BotaoFactory(
                 texto: 'Cadastro de Ordem de Serviço',
                 onPressed: () {
-                  print('Cadastro de Ordem de Serviço');
+                  
                   Get.toNamed(Routes.cadastroDeOrdemDeServicoAtendente);
                 },
                 corBotao: Color.fromARGB(255, 27, 119, 194),

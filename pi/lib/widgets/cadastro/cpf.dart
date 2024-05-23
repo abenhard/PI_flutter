@@ -1,8 +1,8 @@
-import 'package:cpf_cnpj_validator/cpf_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:pi/url.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CPF extends StatefulWidget {
   final TextEditingController controller;
@@ -15,22 +15,30 @@ class CPF extends StatefulWidget {
 
 class CPFstate extends State<CPF> {
   String? _cpfError;
+Future<void> _validateCPF(String cpf) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString('jwt_token');
 
-  Future<void> _validateCPF(String cpf) async {
-    // Perform validation against the database
-    final response = await http.get(Uri.parse(BackendUrls().getPessoaCPF(cpf)));
-    if (response.statusCode == 200) {
-      // If CPF exists in the database, set error message
-      setState(() {
-        _cpfError = 'CPF já cadastrado';
-      });
-    } else {
-      // If CPF does not exist in the database, clear error message
-      setState(() {
-        _cpfError = null;
-      });
-    }
+  // Perform validation against the database
+  final response = await http.get(
+    Uri.parse(BackendUrls().getPessoaCPF(cpf)),
+    headers: <String, String>{
+      'Authorization': 'Bearer $token',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    
+    setState(() {
+      _cpfError = 'CPF já cadastrado';
+    });
+  } else {
+    setState(() {
+      _cpfError = null;
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -82,9 +90,6 @@ class CPFstate extends State<CPF> {
         final cleanCPF = value.replaceAll(RegExp(r'[^\d]'), ''); // Remove non-digits
         if (cleanCPF.length != 11) {
           return 'O CPF deve conter 11 dígitos';
-        }
-        if (!CPFValidator.isValid(cleanCPF)) {
-          return 'Por favor, insira um CPF válido';
         }
         return null;
       },

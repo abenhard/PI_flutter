@@ -42,39 +42,37 @@ class _TecnicoTelaInicialState extends State<TecnicoTelaInicial> with SingleTick
   }
 
   Future<void> _fetchOrders() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  String? token = prefs.getString('jwt_token');
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('jwt_token');
 
-  final response = await http.get(
-    Uri.parse('${BackendUrls().getOrdemServicoTecnico()}'),
-    headers: {
-      'Authorization': 'Bearer $token',
-    },
-  );
+    final response = await http.get(
+      Uri.parse('${BackendUrls().getOrdemServicoTecnico()}'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
 
-  if (response.statusCode == 200) {
-    setState(() {
-      allOrders = json.decode(response.body);
-      filteredOrders = allOrders;
-    });
-  } else {
-    // Handle error
-    throw Exception('Failed to load orders');
+    if (response.statusCode == 200) {
+      setState(() {
+        allOrders = json.decode(response.body);
+        filteredOrders = allOrders;
+      });
+    } else {
+      // Handle error
+      throw Exception('Failed to load orders');
+    }
   }
-}
-
 
   void _filterOrders(String searchTerm) {
-  setState(() {
-    _searchTerm = searchTerm;
-    filteredOrders = allOrders.where((order) {
-      final clienteNome = order['clienteNome'].toLowerCase();
-      final clienteCpf = order['clienteCpf'].toLowerCase();
-      return clienteNome.contains(searchTerm.toLowerCase()) || clienteCpf.contains(searchTerm.toLowerCase());
-    }).toList();
-  });
-}
-
+    setState(() {
+      _searchTerm = searchTerm;
+      filteredOrders = allOrders.where((order) {
+        final clienteNome = order['clienteNome'].toLowerCase();
+        final clienteCpf = order['clienteCpf'].toLowerCase();
+        return clienteNome.contains(searchTerm.toLowerCase()) || clienteCpf.contains(searchTerm.toLowerCase());
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,43 +107,59 @@ class _TecnicoTelaInicialState extends State<TecnicoTelaInicial> with SingleTick
               ],
             ),
           ),
-          BotaoFactory(
-              texto: 'Consultar de Ordem de Serviço', 
-              onPressed: (){print('Consultar de Ordem de Serviço');}, 
-              corBotao: Colors.lightBlue,
-              ),
-          SizedBox(height: 20,),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 15.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                BotaoFactory(
+                  texto: 'Cadastrar Ordem de Serviço',
+                  onPressed: () {
+                    Get.toNamed(Routes.cadastroDeOrdemDeServicoTecnico);
+                  },
+                  corBotao: Colors.lightBlue,
+                ),
+                SizedBox(height: 20),
+                BotaoFactory(
+                  texto: 'Cadastrar de Cliente',
+                  onPressed: () {
+                    Get.toNamed(Routes.cadastroDeCliente);
+                  },
+                  corBotao: Colors.lightBlue,
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
-Widget _buildOrderList(String status) {
-  List<dynamic> orders = filteredOrders.where((order) => order['status'] == status).toList();
 
-  return ListView.builder(
-    itemCount: orders.length,
-    itemBuilder: (context, index) {
-      final order = orders[index];
-      return Card(
-        margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-        child: ListTile(
-          title: Text(order['clienteNome']),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Tipo de Serviço: ${order['tipoServico']}'),
-              Text('Data de Criação: ${order['dataCriacao']}'),
-              Text('Descrição: ${order['descricaoProblema']}'),
-            ],
+  Widget _buildOrderList(String status) {
+    List<dynamic> orders = filteredOrders.where((order) => order['status'] == status).toList();
+
+    return ListView.builder(
+      itemCount: orders.length,
+      itemBuilder: (context, index) {
+        final order = orders[index];
+        return Card(
+          margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+          child: ListTile(
+            title: Text(order['clienteNome']),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Tipo de Serviço: ${order['tipoServico']}'),
+                Text('Data de Criação: ${order['dataCriacao']}'),
+                Text('Descrição: ${order['descricaoProblema']}'),
+              ],
+            ),
+            onTap: () {
+              // Navegar para a tela da ordem
+            },
           ),
-          onTap: () {
-            // Navegar para a tela da ordem
-          },
-        ),
-      );
-    },
-  );
-}
-
-
+        );
+      },
+    );
+  }
 }

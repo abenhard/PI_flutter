@@ -44,4 +44,12 @@ class BackendUrls {
   {
      return getOrdem() + '/funcionario/tecnico';
   }
+  String postOrdemServicoAtendente()
+  {
+    return getOrdem() +'/cadastroPorAtendente';
+  }
+  String postOrdemServicoTecnico()
+  {
+    return getOrdem() +'/cadastroPorTecnico';
+  }
 }

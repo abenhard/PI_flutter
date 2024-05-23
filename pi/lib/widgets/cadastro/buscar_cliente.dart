@@ -20,39 +20,39 @@ class _BuscarClienteState extends State<BuscarCliente> {
 
   Future<void> _searchClient(String query) async {
     setState(() {
-        _isLoading = true;
+      _isLoading = true;
     });
 
     try {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        String? token = prefs.getString('jwt_token');
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('jwt_token');
 
-        final response = await http.get(
-            Uri.parse('${BackendUrls().getPessoas()}?query=$query'),
-            headers: {
-                'Authorization': 'Bearer $token',
-            },
-        );
+      final response = await http.get(
+        Uri.parse('${BackendUrls().getPessoas()}?query=$query'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-        if (response.statusCode == 200) {
-            final List<dynamic> data = jsonDecode(response.body);
-            setState(() {
-                _clientes = data.map((cliente) => {
-                  'nome': cliente['nome'] as String,
-                  'cpf': cliente['cpf'] as String
-                }).toList();
-            });
-        } else {
-            // Handle other status codes
-        }
-    } catch (e) {
-        // Handle errors
-    } finally {
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
         setState(() {
-            _isLoading = false;
+          _clientes = data.map((cliente) => {
+            'nome': cliente['nome'] as String,
+            'cpf': cliente['cpf'] as String
+          }).toList();
         });
+      } else {
+        // Handle other status codes
+      }
+    } catch (e) {
+      // Handle errors
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
-}
+  }
 
   @override
   Widget build(BuildContext context) {
