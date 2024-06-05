@@ -216,6 +216,7 @@ class _OrdemDeServicoListState extends State<OrdemDeServicoList> with RouteAware
                   },
                   corBotao: Colors.lightBlue,
                 ),
+                SizedBox(height: 10,),
                 if (widget.additionalButtons != null) ...widget.additionalButtons!, // Use the parameter
               ],
             ),

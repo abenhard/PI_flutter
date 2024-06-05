@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:pi/paginas/pagina_detalhes/cliente_detalhe.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:pi/url.dart';
+
 
 class SearchClientes extends StatefulWidget {
   final Function(String) onClienteSelected;
@@ -74,12 +76,12 @@ class _SearchClientesState extends State<SearchClientes> {
                 title: Text(cliente['nome']),
                 subtitle: Text(cliente['cpf']),
                 onTap: () {
-                  widget.onClienteSelected(cliente['cpf']);
-                  setState(() {
-                    _searchResults = [];
-                    _isSearching = false;
-                    _searchController.text = cliente['nome'];
-                  });
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ClienteDetalhes(cliente: cliente),
+                    ),
+                  );
                 },
               );
             },

@@ -21,7 +21,9 @@ class BackendUrls {
   String getPessoaCPF(String cpf){
     return '$httpBase' + 'pessoa/$cpf';
   }
-
+  String updatePessoa(){
+    return getPessoas();
+  }
   String getFuncionarios() {
     return '$httpBase' + 'funcionario';
   }
