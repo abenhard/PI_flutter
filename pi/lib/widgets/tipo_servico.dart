@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 class TipoServicoDropdown extends StatefulWidget{
   final ValueChanged<String?> onChanged;
   final String? tipoServicoSelecionado;
+  final bool enabled;
 
   const TipoServicoDropdown({
     Key? key,
     required this.onChanged,
     required this.tipoServicoSelecionado,
+    required this.enabled
   }) : super(key: key);
 
   @override
@@ -18,7 +20,7 @@ class TipoServicoDropdown extends StatefulWidget{
 class _TipoServicoDropdownState extends State<TipoServicoDropdown>{
 
   final List<String> tipoServicos = [
-    'Manutenção',
+    'Manutenção'
     'Formatação',
     'Limpeza',
     'Instalação de Software',

@@ -112,7 +112,10 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
           child: ListView(
             children: <Widget>[
               //----Pessoa-----//
-              TextFormFieldGenerico(_nomeController, 'Nome', 'Por favor, insira o nome'),
+              TextFormFieldGenerico(
+                controller:  _nomeController, 
+                label:  'Nome', 
+                validationMessage:  'Por favor, insira o nome'),
               Email(_emailController),
               TelefoneResidencial(_telefoneController),
               WhatsApp(_whatsappController),
@@ -140,11 +143,26 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
                     body: Column(
                       children: [
                         CEP(_cepController),
-                        TextFormFieldGenerico(_numeroController, 'Numero', 'Por favor insira o numero da residência'),
-                        TextFormFieldGenerico(_ruaController, 'Rua', 'Por favor, insira o nome da rua'),
-                        TextFormFieldGenerico(_bairroController, 'Bairro', 'Por favor, insira o nome do Bairro'),
-                        TextFormFieldGenerico(_complementoController, 'Complemento', 'Por favor, insira o complemento (Opcional)'),
-                        TextFormFieldGenerico(_cidadeController, 'Cidade', 'Por favor, insira o nome da Cidade'),
+                        TextFormFieldGenerico(
+                          controller:  _numeroController, 
+                          label:  'Numero', 
+                          validationMessage:  'Por favor insira o numero da residência'),
+                        TextFormFieldGenerico(
+                          controller: _ruaController, 
+                          label:'Rua', 
+                          validationMessage:'Por favor, insira o nome da rua'),
+                        TextFormFieldGenerico(
+                          controller: _bairroController, 
+                          label:'Bairro', 
+                          validationMessage:'Por favor, insira o nome do Bairro'),
+                        TextFormFieldGenerico(
+                          controller: _complementoController, 
+                          label:'Complemento', 
+                          validationMessage:'Por favor, insira o complemento (Opcional)'),
+                        TextFormFieldGenerico(
+                          controller: _cidadeController, 
+                          label:'Cidade', 
+                          validationMessage:'Por favor, insira o nome da Cidade'),
                         EstadoDropdown(
                           onChanged: (newValue) {
                             setState(() {

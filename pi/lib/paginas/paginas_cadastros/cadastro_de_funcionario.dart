@@ -129,7 +129,10 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
           child: ListView(
             children: <Widget>[
               //----Pessoa-----//
-              TextFormFieldGenerico(_nomeController, 'Nome', 'Por favor, insira o nome'),
+              TextFormFieldGenerico(
+                controller:  _nomeController, 
+                label:  'Nome', 
+                validationMessage:'Por favor, insira o nome'),
               Email(_emailController),
               TelefoneResidencial(_telefoneController),
               WhatsApp(_whatsappController),
@@ -160,11 +163,23 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
                     body: Column(
                       children: [
                         CEP(_cepController),
-                        TextFormFieldGenerico(_numeroController, 'Numero', 'Por favor insira o numero da residência'),
-                        TextFormFieldGenerico(_ruaController, 'Rua', 'Por favor, Insira o nome da rua'),
-                        TextFormFieldGenerico(_bairroController, 'Bairro', 'Por favor, Insira o nome do Bairro'),
+                        TextFormFieldGenerico(
+                         controller:  _numeroController, 
+                         label:  'Numero', 
+                         validationMessage:  'Por favor insira o numero da residência'),
+                        TextFormFieldGenerico(
+                         controller:  _ruaController, 
+                          label:  'Rua', 
+                          validationMessage:'Por favor, Insira o nome da rua'),
+                        TextFormFieldGenerico(
+                         controller:  _bairroController, 
+                          label:  'Bairro', 
+                          validationMessage:'Por favor, Insira o nome do Bairro'),
                         optionalBuildTextFormField(_complementoController, 'complemento'),
-                        TextFormFieldGenerico(_cidadeController, 'Cidade', 'Por favor, Insira o nome da Cidade'),
+                        TextFormFieldGenerico(
+                         controller:  _cidadeController, 
+                          label:  'Cidade', 
+                          validationMessage:'Por favor, Insira o nome da Cidade'),
                         EstadoDropdown(
                         onChanged: (valorSelecionado) {
                           setState(() {
@@ -201,7 +216,10 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
                     },
                     body: Column(
                       children: [
-                        TextFormFieldGenerico(_senhaController, 'Senha', 'Digite sua Senha!'),
+                        TextFormFieldGenerico(
+                          controller:_senhaController, 
+                          label:  'Senha', 
+                          validationMessage: 'Digite sua Senha!'),
                         
                         CargoDropdown(onChanged: (valorSelecionado){
                           setState(() {

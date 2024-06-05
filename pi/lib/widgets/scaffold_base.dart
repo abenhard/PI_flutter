@@ -20,7 +20,7 @@ class ScaffoldBase extends StatefulWidget {
 class _ScaffoldBaseState extends State<ScaffoldBase> {
   late String _title;
   bool _isLoggedIn = false;
-  late String _username;
+
 
   @override
   void initState() {
@@ -33,7 +33,6 @@ class _ScaffoldBaseState extends State<ScaffoldBase> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _isLoggedIn = prefs.getString('jwt_token') != null;
-      _username = prefs.getString('login') ?? "ABF Informática";
     });
   }
 

@@ -3,42 +3,43 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:pi/widgets/tipo_servico.dart';
+import 'package:pi/widgets/cadastro/search_cliente.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:pi/url.dart';
+import 'package:intl/intl.dart';
+import 'package:pi/widgets/tipo_servico.dart';
 import 'package:pi/widgets/scaffold_base.dart';
 import 'package:pi/widgets/textFormFieldGenerico.dart';
 import 'package:pi/widgets/statusEnum.dart';
-import 'package:intl/intl.dart';
-import 'dart:convert';
+import 'package:pi/url.dart';
 
 class CadastroDeOrdemDeServicoTecnico extends StatefulWidget {
   const CadastroDeOrdemDeServicoTecnico({Key? key}) : super(key: key);
 
   @override
-  _CadastroDeOrdemDeServicoTecnico createState() => _CadastroDeOrdemDeServicoTecnico();
+  _CadastroDeOrdemDeServicoTecnico createState() =>
+      _CadastroDeOrdemDeServicoTecnico();
 }
 
-class _CadastroDeOrdemDeServicoTecnico extends State<CadastroDeOrdemDeServicoTecnico> {
+class _CadastroDeOrdemDeServicoTecnico
+    extends State<CadastroDeOrdemDeServicoTecnico> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _descricaoController = TextEditingController();
-  final TextEditingController _relatorioTecnicoController = TextEditingController();
-  final TextEditingController _produtoExtraController = TextEditingController();
-  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _relatorioTecnicoController =
+      TextEditingController();
+  final TextEditingController _produtoExtraController =
+      TextEditingController();
   String? _clienteSelecionado;
   String? _tipoServicoSelecionado;
   DateTime? _dataPrevisao;
   Position? _currentPosition;
   List<File> _selectedFiles = [];
-  List<dynamic> _searchResults = [];
-  bool _isSearching = false;
+  Future<http.Response>? _futureResponse;
 
   @override
   void dispose() {
     _descricaoController.dispose();
     _relatorioTecnicoController.dispose();
     _produtoExtraController.dispose();
-    _searchController.dispose();
     super.dispose();
   }
 
@@ -47,7 +48,7 @@ class _CadastroDeOrdemDeServicoTecnico extends State<CadastroDeOrdemDeServicoTec
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
+      lastDate: DateTime(2050),
     );
     if (picked != null && picked != _dataPrevisao) {
       setState(() {
@@ -81,13 +82,16 @@ class _CadastroDeOrdemDeServicoTecnico extends State<CadastroDeOrdemDeServicoTec
 
     if (permission == LocationPermission.deniedForever) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Location permissions are permanently denied, we cannot request permissions.')),
+        const SnackBar(
+            content: Text(
+                'Location permissions are permanently denied, we cannot request permissions.')),
       );
       return;
     }
 
     try {
-      _currentPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      _currentPosition = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
       setState(() {});
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -97,29 +101,27 @@ class _CadastroDeOrdemDeServicoTecnico extends State<CadastroDeOrdemDeServicoTec
   }
 
   Future<void> _submitForm() async {
+    print('Botao apertado');
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      await _getCurrentLocation(); 
-      var response = await cadastrarOrdem();
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ordem de serviço cadastrada com sucesso!')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${response.body}')),
-        );
-      }
+      print('Form validated');
+      await _getCurrentLocation();
+      setState(() {
+        _futureResponse = cadastrarOrdem();
+      });
+    } else {
+      print('Form validation failed');
     }
   }
 
   Future<http.Response> cadastrarOrdem() async {
+    print('Sending request to backend');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('jwt_token');
 
     final DateFormat dateFormat = DateFormat('yyyy-MM-dd');
-    String dataPrevisaoFormatted = _dataPrevisao != null ? dateFormat.format(_dataPrevisao!) : '';
+    String dataPrevisaoFormatted =
+        _dataPrevisao != null ? dateFormat.format(_dataPrevisao!) : '';
 
     final ordemDeServicoTecnicoDTO = {
       'clienteCPF': _clienteSelecionado ?? '',
@@ -130,7 +132,9 @@ class _CadastroDeOrdemDeServicoTecnico extends State<CadastroDeOrdemDeServicoTec
       'relatorio_tecnico': _relatorioTecnicoController.text,
       'produto_extra': _produtoExtraController.text,
       'data_previsao': dataPrevisaoFormatted,
-      'localizacao': _currentPosition != null ? '${_currentPosition!.latitude},${_currentPosition!.longitude}' : ''
+      'localizacao': _currentPosition != null
+          ? '${_currentPosition!.latitude},${_currentPosition!.longitude}'
+          : ''
     };
 
     var request = http.MultipartRequest(
@@ -138,7 +142,8 @@ class _CadastroDeOrdemDeServicoTecnico extends State<CadastroDeOrdemDeServicoTec
       Uri.parse(BackendUrls().postOrdemServicoTecnico()),
     )
       ..headers['Authorization'] = 'Bearer $token'
-      ..fields.addAll(ordemDeServicoTecnicoDTO.map((key, value) => MapEntry(key, value)));
+      ..fields.addAll(ordemDeServicoTecnicoDTO.map((key, value) =>
+          MapEntry(key, value)));
 
     for (var file in _selectedFiles) {
       request.files.add(
@@ -154,45 +159,41 @@ class _CadastroDeOrdemDeServicoTecnico extends State<CadastroDeOrdemDeServicoTec
   }
 
   Future<void> _selectImages() async {
-  final List<String> options = ['Camera', 'Gallery'];
-  final picker = ImagePicker();
-  
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return SimpleDialog(
-        title: Text('Select Image Source'),
-        children: options.map((option) {
-          return SimpleDialogOption(
-            onPressed: () {
-              Navigator.pop(context, option);
-            },
-            child: Text(option),
-          );
-        }).toList(),
-      );
-    },
-  ).then((selectedOption) async {
-    if (selectedOption != null) {
-      XFile? pickedFile;
-      if (selectedOption == 'Camera') {
-        pickedFile = await picker.pickImage(source: ImageSource.camera);
-      } else {
-        pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final List<String> options = ['Camera', 'Gallery'];
+    final picker = ImagePicker();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: Text('Select Image Source'),
+          children: options.map((option) {
+            return SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, option);
+              },
+              child: Text(option),
+            );
+          }).toList(),
+        );
+      },
+    ).then((selectedOption) async {
+      if (selectedOption != null) {
+        XFile? pickedFile;
+        if (selectedOption == 'Camera') {
+          pickedFile = await picker.pickImage(source: ImageSource.camera);
+        } else {
+          pickedFile = await picker.pickImage(source: ImageSource.gallery);
+        }
+        if (pickedFile != null) {
+          final path = pickedFile.path;
+          setState(() {
+            _selectedFiles.add(File(path));
+          });
+        }
       }
-      if (pickedFile != null) {
-        final path = pickedFile.path; 
-        setState(() {
-          _selectedFiles.add(File(path));
-        });
-            }
-    }
-  });
-}
-
-
-
-
+    });
+  }
 
   Widget _buildImagePreview(File imageFile) {
     return Stack(
@@ -225,138 +226,168 @@ class _CadastroDeOrdemDeServicoTecnico extends State<CadastroDeOrdemDeServicoTec
     );
   }
 
-  Future<void> _searchClientes(String query) async {
-  if (query.isEmpty) {
-    setState(() {
-      _searchResults = [];
-      _isSearching = false;
-    });
-    return;
-  }
-
-  setState(() {
-    _isSearching = true;
-  });
-
-  try {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('jwt_token');
-
-    final response = await http.get(
-      Uri.parse(BackendUrls().getPessoaCPF('$query')),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final List<dynamic> jsonResponse = json.decode(response.body);
-      setState(() {
-        _searchResults = jsonResponse;
-        _isSearching = false;
-      });
-    } else {
-      setState(() {
-        _searchResults = [];
-        _isSearching = false;
-      });
-    }
-  } catch (e) {
-    // Handle errors
-    setState(() {
-      _searchResults = [];
-      _isSearching = false;
-    });
-  }
-}
-
-
-
-  Widget _buildSearchResults() {
-  return _isSearching
-      ? CircularProgressIndicator()
-      : ListView.builder(
-          shrinkWrap: true,
-          itemCount: _searchResults.length,
-          itemBuilder: (context, index) {
-            final cliente = _searchResults[index];
-            return ListTile(
-              title: Text(cliente['nome']),
-              subtitle: Text(cliente['cpf']),
-              onTap: () {
-                setState(() {
-                  _clienteSelecionado = cliente['cpf'];
-                  _searchResults = [];
-                  _isSearching = false; // Close the search UI
-                  _searchController.text = cliente['nome']; // Display selected client
-                });
-              },
-            );
-          },
-        );
-}
-
-
   @override
   Widget build(BuildContext context) {
     return ScaffoldBase(
       title: 'Ordem de Serviço',
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: <Widget>[
-              TextFormField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  labelText: 'Buscar Cliente',
-                  hintText: 'Digite o nome ou CPF',
-                ),
-                onChanged: _searchClientes,
+      body: FutureBuilder<http.Response>(
+        future: _futureResponse,
+        builder:
+            (BuildContext context, AsyncSnapshot<http.Response> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 20),
+                  Text(
+                    'CADASTRANDO ORDEM DE SERVIÇO',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ],
               ),
-              _buildSearchResults(),
-              const SizedBox(height: 20),
-              TextFormFieldGenerico(
-                _descricaoController,
-                'Descrição',
-                'Por favor, digite uma breve descrição do problema relatado pelo cliente.',
+            );
+          } else if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return _buildErrorScreen();
+            } else if (snapshot.hasData) {
+              return _buildResponseScreen(snapshot.data!);
+            }
+          }
+          return _buildForm();
+        },
+      ),
+    );
+  }
+
+  Widget _buildForm() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Form(
+        key: _formKey,
+        child: ListView(
+          children: <Widget>[
+            SearchClientes(onClienteSelected: (cpf) {
+              setState(() {
+                _clienteSelecionado = cpf;
+              });
+            }),
+            const SizedBox(height: 20),
+            TextFormFieldGenerico(
+              controller:  _descricaoController,
+              label:  'Descrição',
+              validationMessage:  'Digite uma breve descrição do problema relatado pelo cliente.',
+              keyboardType: TextInputType.text,
+              
+            ),
+            const SizedBox(height: 20),
+            TipoServicoDropdown(
+              onChanged: (valorSelecionado) {
+                setState(() {
+                  _tipoServicoSelecionado = valorSelecionado;
+                });
+              },
+              tipoServicoSelecionado: _tipoServicoSelecionado,
+              enabled: true,
+            ),
+            const SizedBox(height: 20),
+            TextFormFieldGenerico(
+              controller: _relatorioTecnicoController,
+              label:'Relatório Técnico',
+              validationMessage:'Digite os principais quais problemas encontrados e ação necessária para o conserto.',
+            ),
+            const SizedBox(height: 20),
+            TextFormFieldGenerico(
+              controller: _produtoExtraController,
+              label:'Produto Extra',
+              validationMessage:'Digite se necessário, qual(s) produto(s) necessário(s) para o conserto.',
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              title: Text(
+                _dataPrevisao == null
+                    ? 'Nenhuma data selecionada'
+                    : 'Data prevista para entrega: ${_dataPrevisao!.toLocal().toString().split(' ')[0]}',
               ),
-              TipoServicoDropdown(
-                onChanged: (valorSelecionado) {
-                  setState(() {
-                    _tipoServicoSelecionado = valorSelecionado;
-                  });
-                },
-                tipoServicoSelecionado: _tipoServicoSelecionado,
-              ),
-              const SizedBox(height: 20),
-              ListTile(
-                title: Text(
-                  _dataPrevisao == null
-                      ? 'Nenhuma data selecionada'
-                      : 'Data prevista: ${_dataPrevisao!.toLocal().toString().split(' ')[0]}',
-                ),
-                trailing: Icon(Icons.calendar_today),
-                onTap: () => _selectDate(context),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _selectImages,
-                child: const Text('Selecionar Imagens'),
-              ),
-              const SizedBox(height: 20),
-              Wrap(
-                children: _selectedFiles.map((file) => _buildImagePreview(file)).toList(),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Cadastrar Ordem de Serviço'),
-              ),
-            ],
-          ),
+              trailing: Icon(Icons.calendar_today),
+              onTap: () => _selectDate(context),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _selectImages,
+              child: const Text('Selecionar Imagens'),
+            ),
+            const SizedBox(height: 20),
+            Wrap(
+              children: _selectedFiles.map((file) => _buildImagePreview(file)).toList(),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _submitForm,
+              child: const Text('Cadastrar Ordem de Serviço'),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildResponseScreen(http.Response response) {
+    if (response.statusCode == 200) {
+      return _buildSuccessScreen();
+    } else {
+      return _buildErrorScreen(response.body);
+    }
+  }
+
+  Widget _buildSuccessScreen() {
+    Future.delayed(Duration(seconds: 3), () {
+      Navigator.pop(context);
+    });
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.check_circle, color: Colors.green, size: 100),
+          SizedBox(height: 20),
+          Text(
+            'ORDEM DE SERVIÇO CADASTRADA COM SUCESSO',
+            style: TextStyle(fontSize: 18, color: Colors.green),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorScreen([String? message]) {
+    Future.delayed(Duration(seconds: 3), () {
+      setState(() {
+        _futureResponse = null;
+      });
+    });
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error, color: Colors.red, size: 100),
+          SizedBox(height: 20),
+          Text(
+            'FALHA AO CADASTRAR ORDEM DE SERVIÇO',
+            style: TextStyle(fontSize: 18, color: Colors.red),
+          ),
+          if (message != null)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                message,
+                style: TextStyle(fontSize: 16, color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ),
+        ],
       ),
     );
   }

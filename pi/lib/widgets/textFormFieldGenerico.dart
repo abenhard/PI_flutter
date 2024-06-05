@@ -1,7 +1,22 @@
-
 import 'package:flutter/material.dart';
 
-TextFormField TextFormFieldGenerico(TextEditingController controller, String label, String? validationMessage, [TextInputType keyboardType = TextInputType.text]) {
+class TextFormFieldGenerico extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? validationMessage;
+  final TextInputType keyboardType;
+  final bool enabled;
+
+  TextFormFieldGenerico({
+    required this.controller,
+    required this.label,
+    this.validationMessage,
+    this.keyboardType = TextInputType.text,
+    this.enabled = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(labelText: label),
@@ -12,5 +27,7 @@ TextFormField TextFormFieldGenerico(TextEditingController controller, String lab
         }
         return null;
       },
+      enabled: enabled,
     );
   }
+}

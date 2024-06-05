@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:pi/widgets/tipo_servico.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pi/url.dart';
-import 'package:pi/widgets/cadastro/buscar_cliente.dart';
+import 'package:pi/widgets/cadastro/search_cliente.dart';
 import 'package:pi/widgets/scaffold_base.dart';
 import 'package:pi/widgets//cadastro/tecnico_dropdown.dart';
 import 'package:pi/widgets/textFormFieldGenerico.dart';
@@ -80,13 +80,11 @@ Future<http.Response> cadastrarOrdem() async {
           key: _formKey,
           child: ListView(
             children: <Widget>[
-              BuscarCliente(
-                onClienteSelecionado: (String cliente) {
-                  setState(() {
-                    _clienteSelecionado = cliente;
-                  });
-                },
-              ),
+              SearchClientes(onClienteSelected: (cpf) {
+                setState(() {
+                  _clienteSelecionado = cpf;
+                });
+              }),
               const SizedBox(height: 20),
               TecnicoDropdown(
                 onTecnicoSelected: (String tecnico) {
@@ -97,9 +95,9 @@ Future<http.Response> cadastrarOrdem() async {
               ),
               const SizedBox(height: 20),
               TextFormFieldGenerico(
-                _descricaoController,
-                'Descrição',
-                'Por favor, digite uma breve descrição do problema relatado pelo cliente.',
+                controller:_descricaoController,
+                label:'Descrição',
+                validationMessage:'Por favor, digite uma breve descrição do problema relatado pelo cliente.',
               ),
               TipoServicoDropdown(
                 onChanged: (valorSelecionado){
@@ -108,6 +106,7 @@ Future<http.Response> cadastrarOrdem() async {
                   });
                 }, 
                 tipoServicoSelecionado: _tipoServicoSelecionado,
+                enabled: true,
               ),
               const SizedBox(height: 20),
               ElevatedButton(

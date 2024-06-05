@@ -52,4 +52,19 @@ class BackendUrls {
   {
     return getOrdem() +'/cadastroPorTecnico';
   }
+  String updateOrdemServicoTecnico(){
+    return getOrdem() + '/alterarOrdem';
+  }
+
+  String deleteImage() {
+    return getOrdem() + '/images';
+  }
+
+  String ordemServicoDetalhes(ordem) {
+    return getOrdem() + '';
+  }
+
+  String getOrdemServicoImagens(ordem) {
+    return getOrdem() +  '/{$ordem}/images';
+  }
 }
