@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pi/widgets/endereco/cep.dart';
+import 'package:pi/widgets/endereco/estado.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -17,11 +19,15 @@ class _ClienteDetalhesState extends State<ClienteDetalhes> {
   final _formKey = GlobalKey<FormState>();
   late Map<String, dynamic> _cliente;
   bool _isEditing = false;
+  late TextEditingController _cepController;
+  String? _estadoSelecionado;
 
   @override
   void initState() {
     super.initState();
     _cliente = Map<String, dynamic>.from(widget.cliente);
+    _cepController = TextEditingController(text: _cliente['cep']);
+    _estadoSelecionado = _cliente['estado'];
   }
 
   Future<void> _saveCliente() async {
@@ -44,6 +50,9 @@ class _ClienteDetalhesState extends State<ClienteDetalhes> {
         setState(() {
           _isEditing = false;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Changes saved successfully')),
+        );
       } else {
         // Handle error
         ScaffoldMessenger.of(context).showSnackBar(
@@ -51,6 +60,12 @@ class _ClienteDetalhesState extends State<ClienteDetalhes> {
         );
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _cepController.dispose();
+    super.dispose();
   }
 
   @override
@@ -117,12 +132,7 @@ class _ClienteDetalhesState extends State<ClienteDetalhes> {
                 decoration: InputDecoration(labelText: 'Bairro'),
                 onSaved: (value) => _cliente['bairro'] = value,
               ),
-              TextFormField(
-                initialValue: _cliente['cep'],
-                enabled: _isEditing,
-                decoration: InputDecoration(labelText: 'CEP'),
-                onSaved: (value) => _cliente['cep'] = value,
-              ),
+              CEP(_cepController, enabled: _isEditing), // Use the CEP widget
               TextFormField(
                 initialValue: _cliente['numero'],
                 enabled: _isEditing,
@@ -135,12 +145,16 @@ class _ClienteDetalhesState extends State<ClienteDetalhes> {
                 decoration: InputDecoration(labelText: 'Cidade'),
                 onSaved: (value) => _cliente['cidade'] = value,
               ),
-              TextFormField(
-                initialValue: _cliente['estado'],
+              EstadoDropdown(
+                estadoSelecionado: _estadoSelecionado,
                 enabled: _isEditing,
-                decoration: InputDecoration(labelText: 'Estado'),
-                onSaved: (value) => _cliente['estado'] = value,
-              ),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _estadoSelecionado = newValue;
+                    _cliente['estado'] = newValue;
+                  });
+                },
+              ), // Use the EstadoDropdown widget
               SizedBox(height: 20),
               _isEditing
                   ? ElevatedButton(

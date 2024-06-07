@@ -142,7 +142,7 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
                     },
                     body: Column(
                       children: [
-                        CEP(_cepController),
+                        CEP(_cepController, enabled: true),
                         TextFormFieldGenerico(
                           controller:  _numeroController, 
                           label:  'Numero', 
@@ -170,6 +170,7 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
                             });
                           },
                           estadoSelecionado: _estadoSelecionado,
+                          enabled: true,
                         ),
                       ],
                     ),

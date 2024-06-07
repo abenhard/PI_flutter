@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class EstadoDropdown extends StatefulWidget {
   final ValueChanged<String?> onChanged;
   final String? estadoSelecionado;
+  final bool enabled;
 
   const EstadoDropdown({
     Key? key,
     required this.onChanged,
     required this.estadoSelecionado,
+    required this.enabled,
   }) : super(key: key);
 
   @override
@@ -49,7 +51,7 @@ class _EstadoDropdownState extends State<EstadoDropdown> {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
       value: widget.estadoSelecionado,
-      onChanged: widget.onChanged,
+      onChanged: widget.enabled ? widget.onChanged : null,
       items: estados.map<DropdownMenuItem<String>>((estado) {
         return DropdownMenuItem<String>(
           value: estado,

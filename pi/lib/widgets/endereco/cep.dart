@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-TextFormField CEP(TextEditingController _cepController) {
-    return TextFormField(
+TextFormField CEP(TextEditingController _cepController, {required bool enabled}) {
+  return TextFormField(
     controller: _cepController,
     maxLength: 9,
     maxLengthEnforcement: MaxLengthEnforcement.enforced,
     decoration: InputDecoration(labelText: 'CEP'),
     keyboardType: TextInputType.datetime,
+    enabled: enabled,
     inputFormatters: [
       FilteringTextInputFormatter.digitsOnly,
       TextInputFormatter.withFunction((oldValue, newValue) {
@@ -35,6 +36,6 @@ TextFormField CEP(TextEditingController _cepController) {
         }
       }
       return null;
-    }
+    },
   );
 }

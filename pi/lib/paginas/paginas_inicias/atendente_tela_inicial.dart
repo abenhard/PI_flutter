@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pi/factories/botao_factory.dart';
+import 'package:pi/widgets/scaffold_base.dart';
 
 class AtendenteTelaInicial extends StatelessWidget{
   const AtendenteTelaInicial({super.key});
@@ -7,18 +8,8 @@ class AtendenteTelaInicial extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(
-      title: const Text('Atendente'),
-      actions: [
-            IconButton(
-              iconSize: 40,
-              icon: Icon(Icons.person),
-              onPressed: () {
-                print('Botão de menu');
-              },
-            ),
-          ]
-    ),
+    return ScaffoldBase(
+      title: 'Atendente',
     body: 
     SingleChildScrollView(
       child: Form(

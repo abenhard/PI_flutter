@@ -9,7 +9,7 @@ class BackendUrls {
     return _instance;
   }
 
-  String httpBase = 'http://192.168.100.3:8080/PI_Backend/';
+  String httpBase =  'http://po2_backend:8080/PI_Backend/'; //'http://192.168.100.3:8080/PI_Backend/';
   
   String getLogin() {
     return '$httpBase' + 'login';

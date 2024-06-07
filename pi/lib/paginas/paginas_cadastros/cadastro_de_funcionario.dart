@@ -162,7 +162,7 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
                     },
                     body: Column(
                       children: [
-                        CEP(_cepController),
+                        CEP(_cepController, enabled: true),
                         TextFormFieldGenerico(
                          controller:  _numeroController, 
                          label:  'Numero', 
@@ -187,6 +187,7 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
                           });
                         },
                         estadoSelecionado: _estadoSelecionado,
+                        enabled: true,
                         ),
                       ],
                     ),
@@ -206,7 +207,7 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
                   ExpansionPanel(
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return ListTile(
-                        title: const Text('Cargo'),
+                        title: const Text('Função'),
                         onTap: () {
                           setState(() {
                             _showCargo = !isExpanded;
