@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:pi/widgets/scaffold_base.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -139,8 +140,8 @@ class _OrdemDeServicoListState extends State<OrdemDeServicoList> with RouteAware
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+    return ScaffoldBase(
+      title:widget.title,
       body: Column(
         children: [
           Padding(

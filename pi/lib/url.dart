@@ -9,7 +9,7 @@ class BackendUrls {
     return _instance;
   }
 
-  String httpBase = 'http://192.168.100.3:8080/PI_Backend/';
+  String httpBase =  'http://192.168.100.3:8080/PI_Backend/';
   
   String getLogin() {
     return '$httpBase' + 'login';
@@ -24,14 +24,14 @@ class BackendUrls {
   String updatePessoa(){
     return getPessoas();
   }
-  String getFuncionarios() {
+  String getFuncionario() {
     return '$httpBase' + 'funcionario';
   }
   String getTecnicos(){
      return '$httpBase' + 'funcionario/tecnicos';
   }
   String getCadastrarFuncionario(){
-    return  getFuncionarios() + '/cadastrar';
+    return  getFuncionario() + '/cadastrar';
   }
   String getOrdem(){
     return  '$httpBase' + 'ordem';

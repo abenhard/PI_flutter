@@ -268,7 +268,8 @@ class _CadastroDeOrdemDeServicoTecnico
         key: _formKey,
         child: ListView(
           children: <Widget>[
-            SearchClientes(onClienteSelected: (cpf) {
+            SearchClientes(             
+              onClienteSelected: (cpf) {
               setState(() {
                 _clienteSelecionado = cpf;
               });
@@ -305,9 +306,9 @@ class _CadastroDeOrdemDeServicoTecnico
             ),
             const SizedBox(height: 20),
             ListTile(
-              title: Text(
+              title: Text(              
                 _dataPrevisao == null
-                    ? 'Nenhuma data selecionada'
+                    ? 'Selecione um Dia para previsão de entrega'
                     : 'Data prevista para entrega: ${_dataPrevisao!.toLocal().toString().split(' ')[0]}',
               ),
               trailing: Icon(Icons.calendar_today),

@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class CargoDropdown extends StatefulWidget {
   final ValueChanged<String?> onChanged;
   final String? cargoSelecionado;
+  final bool enabled;
 
   const CargoDropdown({
     Key? key,
     required this.onChanged,
     required this.cargoSelecionado,
+    required this.enabled,
   }) : super(key: key);
 
   @override
@@ -25,7 +27,7 @@ class _CargoDropdownState extends State<CargoDropdown> {
   Widget build(BuildContext context) {
     return DropdownButtonFormField<String>(
       value: widget.cargoSelecionado,
-      onChanged: widget.onChanged,
+      onChanged: widget.enabled ? widget.onChanged : null,
       items: cargos.map((cargo) {
         return DropdownMenuItem<String>(
           value: cargo,

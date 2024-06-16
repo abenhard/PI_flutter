@@ -66,7 +66,21 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
       }
     }
   }
-
+  void _handlePessoaFound(Map<String, dynamic> pessoa) {
+    setState(() {
+      _nomeController.text = pessoa['nome'];
+      _emailController.text = pessoa['email'];
+      _telefoneController.text = pessoa['telefone'];
+      _whatsappController.text = pessoa['whatsapp'];
+      _ruaController.text = pessoa['rua'];
+      _bairroController.text = pessoa['bairro'];
+      _complementoController.text = pessoa['complemento'];
+      _cepController.text = pessoa['cep'];
+      _numeroController.text = pessoa['numero'];
+      _cidadeController.text = pessoa['cidade'];
+      _estadoSelecionado = pessoa['estado'];
+    });
+  }
   Future<http.Response> registrarPessoa() async {
     final pessoaEnderecoDTO = {
       'pessoaDTO': {
@@ -119,7 +133,11 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
               Email(_emailController),
               TelefoneResidencial(_telefoneController),
               WhatsApp(_whatsappController),
-              CPF(controller: _cpfController),
+              CPF(
+                controller: _cpfController,
+                onPessoaFound: _handlePessoaFound,
+                enabled: true,
+              ),
               //-----Endereço-----//
               const SizedBox(height: 10,),
               ExpansionPanelList(
@@ -142,7 +160,7 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
                     },
                     body: Column(
                       children: [
-                        CEP(_cepController),
+                        CEP(_cepController, enabled: true),
                         TextFormFieldGenerico(
                           controller:  _numeroController, 
                           label:  'Numero', 
@@ -170,6 +188,7 @@ class _CadastroDeClienteState extends State<CadastroDeCliente> {
                             });
                           },
                           estadoSelecionado: _estadoSelecionado,
+                          enabled: true,
                         ),
                       ],
                     ),
