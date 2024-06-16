@@ -80,7 +80,8 @@ Future<http.Response> cadastrarOrdem() async {
           key: _formKey,
           child: ListView(
             children: <Widget>[
-              SearchClientes(onClienteSelected: (cpf) {
+              SearchClientes(
+                onClienteSelected: (cpf) {
                 setState(() {
                   _clienteSelecionado = cpf;
                 });

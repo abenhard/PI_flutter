@@ -51,12 +51,12 @@ class _ClienteDetalhesState extends State<ClienteDetalhes> {
           _isEditing = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Changes saved successfully')),
+          SnackBar(content: Text('Atualização realizada com sucesso')),
         );
       } else {
         // Handle error
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save changes')),
+          SnackBar(content: Text('Falha ao atualizar dados')),
         );
       }
     }

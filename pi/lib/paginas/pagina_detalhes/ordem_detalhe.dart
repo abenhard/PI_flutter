@@ -78,6 +78,8 @@ class _OrdemDetalhesState extends State<OrdemDetalhes> {
         Uri.parse('${BackendUrls().updateOrdemServicoTecnico()}'),
       )
         ..headers['Authorization'] = 'Bearer $_token'
+        ..fields['id'] = widget.ordem['id'].toString()
+        ..fields['status'] = widget.ordem['status'].toString()
         ..fields['clienteNome'] = _clienteNomeController.text
         ..fields['tipo_servico'] = _tipoServicoSelecionado ?? ''
         ..fields['descricao_problema'] = _descricaoController.text
@@ -270,17 +272,20 @@ class _OrdemDetalhesState extends State<OrdemDetalhes> {
                     enabled: _isEditing,
                   ),
                   SizedBox(height: 16.0),
-                  TipoServicoDropdown(
-                    tipoServicoSelecionado: _tipoServicoSelecionado,
-                    enabled: _isEditing,
-                    onChanged: _isEditing
-                        ? (newValue) {
+                  _isEditing
+                      ? TipoServicoDropdown(
+                          tipoServicoSelecionado: _tipoServicoSelecionado,
+                          enabled: true,
+                          onChanged: (newValue) {
                             setState(() {
                               _tipoServicoSelecionado = newValue;
                             });
-                          }
-                        : (newValue){} ,              
-                  ),
+                          },
+                        )
+                      : ListTile(
+                          title: Text('Tipo de Serviço'),
+                          subtitle: Text(_tipoServicoSelecionado ?? 'Nenhum tipo selecionado'),
+                        ),
                   SizedBox(height: 16.0),
                   TextFormFieldGenerico(
                     controller: _produtoExtraController,

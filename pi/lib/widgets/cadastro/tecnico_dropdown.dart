@@ -34,7 +34,7 @@ class _TecnicoDropdownState extends State<TecnicoDropdown> {
       String? token = prefs.getString('jwt_token');
 
       final response = await http.get(
-        Uri.parse(BackendUrls().getFuncionarios()),
+        Uri.parse(BackendUrls().getFuncionario()),
         headers: {
           'Authorization': 'Bearer $token',
         },

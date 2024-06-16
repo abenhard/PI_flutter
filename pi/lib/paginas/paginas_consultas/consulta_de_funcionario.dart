@@ -23,7 +23,7 @@ class _ConsultaDeFuncionarioState extends State<ConsultaDeFuncionario> {
     String? token = prefs.getString('jwt_token');
 
     final response = await http.get(
-      Uri.parse(BackendUrls().getFuncionarios()), // Adjust the URL accordingly
+      Uri.parse(BackendUrls().getFuncionario()), // Adjust the URL accordingly
       headers: {
         'Authorization': 'Bearer $token',
       },
@@ -36,7 +36,7 @@ class _ConsultaDeFuncionarioState extends State<ConsultaDeFuncionario> {
       });
     } else {
       // Handle error
-      throw Exception('Failed to load employees');
+      throw Exception('Falha ao carregar funcionarios');
     }
   }
 
@@ -76,7 +76,7 @@ class _ConsultaDeFuncionarioState extends State<ConsultaDeFuncionario> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Buscar por Nome ou CPF',
                 border: OutlineInputBorder(),
               ),

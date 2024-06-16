@@ -11,7 +11,7 @@ import 'package:pi/widgets/scaffold_base.dart';
 import 'package:pi/widgets/cadastro/telefone_residencial.dart';
 import 'package:pi/widgets/textFormFieldGenerico.dart';
 import 'package:pi/widgets/whatsapp.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 class CadastroDeFuncionario extends StatefulWidget {
   const CadastroDeFuncionario({Key? key}) : super(key: key);
 
@@ -22,7 +22,6 @@ class CadastroDeFuncionario extends StatefulWidget {
 class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
   final _formKey = GlobalKey<FormState>();
 
-  
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _telefoneController = TextEditingController();
@@ -59,8 +58,24 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
     _cidadeController.dispose();
     _complementoController.dispose();
     _senhaController.dispose();
-    
+
     super.dispose();
+  }
+
+  void _handlePessoaFound(Map<String, dynamic> pessoa) {
+    setState(() {
+      _nomeController.text = pessoa['nome'];
+      _emailController.text = pessoa['email'];
+      _telefoneController.text = pessoa['telefone'];
+      _whatsappController.text = pessoa['whatsapp'];
+      _ruaController.text = pessoa['rua'];
+      _bairroController.text = pessoa['bairro'];
+      _complementoController.text = pessoa['complemento'];
+      _cepController.text = pessoa['cep'];
+      _numeroController.text = pessoa['numero'];
+      _cidadeController.text = pessoa['cidade'];
+      _estadoSelecionado = pessoa['estado'];
+    });
   }
 
   Future<void> _submitForm() async {
@@ -69,7 +84,7 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
       var response = await registrarFuncionario();
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cliente cadastrado com sucesso!')),
+          const SnackBar(content: Text('Funcionario cadastrado com sucesso!')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -79,7 +94,9 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
     }
   }
 
-  Future<http.Response> registrarFuncionario() {
+  Future<http.Response> registrarFuncionario() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('jwt_token');
 
     final FuncionarioCadastro = {
       'pessoaEnderecoDTO': {
@@ -112,7 +129,8 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
     return http.post(
       Uri.parse(BackendUrls().getCadastrarFuncionario()),
       headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+         'Content-Type': 'application/json; charset=UTF-8',
+         'Authorization': 'Bearer $token',
       },
       body: jsonEncode(FuncionarioCadastro),
     );
@@ -130,16 +148,19 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
             children: <Widget>[
               //----Pessoa-----//
               TextFormFieldGenerico(
-                controller:  _nomeController, 
-                label:  'Nome', 
-                validationMessage:'Por favor, insira o nome'),
+                controller: _nomeController,
+                label: 'Nome',
+                validationMessage: 'Por favor, insira o nome',
+              ),
               Email(_emailController),
               TelefoneResidencial(_telefoneController),
               WhatsApp(_whatsappController),
-              CPF(controller: _cpfController),
-              
-
-              SizedBox(height: 20,),
+              CPF(
+                controller: _cpfController,
+                onPessoaFound: _handlePessoaFound,
+                enabled: true,
+              ),
+              SizedBox(height: 20),
 
               //--Endereco--//
               ExpansionPanelList(
@@ -164,30 +185,34 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
                       children: [
                         CEP(_cepController, enabled: true),
                         TextFormFieldGenerico(
-                         controller:  _numeroController, 
-                         label:  'Numero', 
-                         validationMessage:  'Por favor insira o numero da residência'),
+                          controller: _numeroController,
+                          label: 'Numero',
+                          validationMessage: 'Por favor insira o numero da residência',
+                        ),
                         TextFormFieldGenerico(
-                         controller:  _ruaController, 
-                          label:  'Rua', 
-                          validationMessage:'Por favor, Insira o nome da rua'),
+                          controller: _ruaController,
+                          label: 'Rua',
+                          validationMessage: 'Por favor, Insira o nome da rua',
+                        ),
                         TextFormFieldGenerico(
-                         controller:  _bairroController, 
-                          label:  'Bairro', 
-                          validationMessage:'Por favor, Insira o nome do Bairro'),
+                          controller: _bairroController,
+                          label: 'Bairro',
+                          validationMessage: 'Por favor, Insira o nome do Bairro',
+                        ),
                         optionalBuildTextFormField(_complementoController, 'complemento'),
                         TextFormFieldGenerico(
-                         controller:  _cidadeController, 
-                          label:  'Cidade', 
-                          validationMessage:'Por favor, Insira o nome da Cidade'),
+                          controller: _cidadeController,
+                          label: 'Cidade',
+                          validationMessage: 'Por favor, Insira o nome da Cidade',
+                        ),
                         EstadoDropdown(
-                        onChanged: (valorSelecionado) {
-                          setState(() {
-                            _estadoSelecionado = valorSelecionado;
-                          });
-                        },
-                        estadoSelecionado: _estadoSelecionado,
-                        enabled: true,
+                          onChanged: (valorSelecionado) {
+                            setState(() {
+                              _estadoSelecionado = valorSelecionado;
+                            });
+                          },
+                          estadoSelecionado: _estadoSelecionado,
+                          enabled: true,
                         ),
                       ],
                     ),
@@ -195,7 +220,8 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
                   ),
                 ],
               ),
-              SizedBox(height: 20,),
+              SizedBox(height: 20),
+
               //------CARGO------//
               ExpansionPanelList(
                 expansionCallback: (int index, bool isExpanded) {
@@ -218,24 +244,29 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
                     body: Column(
                       children: [
                         TextFormFieldGenerico(
-                          controller:_senhaController, 
-                          label:  'Senha', 
-                          validationMessage: 'Digite sua Senha!'),
+                          controller: _senhaController,
+                          label: 'Senha',
+                          validationMessage: 'Digite sua Senha!',
+                        ),
+                        CargoDropdown(
+                          enabled: true,
+                          onChanged: (valorSelecionado) {
+                            setState(() {
+                              _cargoSelecionado = valorSelecionado;
+                            });
+                          },
+                          cargoSelecionado: _cargoSelecionado,
+                        ),
                         
-                        CargoDropdown(onChanged: (valorSelecionado){
-                          setState(() {
-                            _cargoSelecionado = valorSelecionado;
-                          });
-                        }, cargoSelecionado: _cargoSelecionado),
-                                ],
-                              ),
-                              isExpanded: _showCargo,
-                            ),
-                        ],
-                      ),
+                      ],
+                    ),
+                    isExpanded: _showCargo,
+                  ),
+                ],
+              ),
 
               SizedBox(height: 16),
-              
+
               ElevatedButton(
                 onPressed: _submitForm,
                 child: Text('Cadastrar'),
@@ -254,5 +285,4 @@ class _CadastroDeFuncionarioState extends State<CadastroDeFuncionario> {
       keyboardType: keyboardType,
     );
   }
-  
 }
