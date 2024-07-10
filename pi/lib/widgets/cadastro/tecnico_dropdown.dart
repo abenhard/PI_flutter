@@ -6,8 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class TecnicoDropdown extends StatefulWidget {
   final Function(String) onTecnicoSelected;
+  final bool isEditing;
 
-  const TecnicoDropdown({required this.onTecnicoSelected, Key? key}) : super(key: key);
+  const TecnicoDropdown({required this.onTecnicoSelected, required this.isEditing, Key? key}) : super(key: key);
 
   @override
   _TecnicoDropdownState createState() => _TecnicoDropdownState();
@@ -17,7 +18,7 @@ class _TecnicoDropdownState extends State<TecnicoDropdown> {
   String? _tecnicoSelecionado;
   List<Map<String, String>> _tecnicos = [];
   bool _isLoading = false;
-
+  
   @override
   void initState() {
     super.initState();
@@ -34,7 +35,7 @@ class _TecnicoDropdownState extends State<TecnicoDropdown> {
       String? token = prefs.getString('jwt_token');
 
       final response = await http.get(
-        Uri.parse(BackendUrls().getFuncionario()),
+        Uri.parse(BackendUrls().getTecnicos()),
         headers: {
           'Authorization': 'Bearer $token',
         },
@@ -74,10 +75,10 @@ class _TecnicoDropdownState extends State<TecnicoDropdown> {
         ? CircularProgressIndicator()
         : DropdownButtonFormField<String>(
             value: _tecnicoSelecionado,
-            items: _tecnicos.map((technician) {
+            items: _tecnicos.map((tecnico) {
               return DropdownMenuItem<String>(
-                value: technician['login'],
-                child: Text(technician['nome']!),
+                value: tecnico['login'],
+                child: Text(tecnico['nome']!),
               );
             }).toList(),
             onChanged: (String? newValue) {

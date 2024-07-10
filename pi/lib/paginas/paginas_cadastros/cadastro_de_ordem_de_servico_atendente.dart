@@ -50,7 +50,6 @@ Future<http.Response> cadastrarOrdem() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('jwt_token');
 
-    print('token: $token');
 
     final ordemDeServicoAtendenteDTO = {
         'clienteCPF': _clienteSelecionado,
@@ -88,6 +87,7 @@ Future<http.Response> cadastrarOrdem() async {
               }),
               const SizedBox(height: 20),
               TecnicoDropdown(
+                isEditing: true,
                 onTecnicoSelected: (String tecnico) {
                   setState(() {
                     _tecnicoSelecionado = tecnico;

@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:pi/url.dart';
+import 'package:pi/main.dart';
 
 class ConsultaDeFuncionario extends StatefulWidget {
   const ConsultaDeFuncionario({Key? key}) : super(key: key);
@@ -13,10 +14,10 @@ class ConsultaDeFuncionario extends StatefulWidget {
   _ConsultaDeFuncionarioState createState() => _ConsultaDeFuncionarioState();
 }
 
-class _ConsultaDeFuncionarioState extends State<ConsultaDeFuncionario> {
+class _ConsultaDeFuncionarioState extends State<ConsultaDeFuncionario> with RouteAware {
   List<dynamic> _funcionarios = [];
   List<dynamic> _filteredFuncionarios = [];
-  bool _showInactive = false;
+  bool _mostrarInativos = false;
 
   Future<void> _fetchFuncionarios() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -46,6 +47,30 @@ class _ConsultaDeFuncionarioState extends State<ConsultaDeFuncionario> {
     _fetchFuncionarios();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route != null) {
+      routeObserver.subscribe(this, route as PageRoute<dynamic>);
+    }
+  }
+
+  @override
+  void dispose() {
+    final route = ModalRoute.of(context);
+    if (route != null) {
+      routeObserver.unsubscribe(this);
+    }
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    _fetchFuncionarios();
+    super.didPopNext();
+  }
+
   void _filterFuncionarios(String query) {
     setState(() {
       _filteredFuncionarios = _funcionarios.where((funcionario) {
@@ -55,14 +80,14 @@ class _ConsultaDeFuncionarioState extends State<ConsultaDeFuncionario> {
         final searchLower = query.toLowerCase();
 
         return (nome.contains(searchLower) || cpf.contains(searchLower)) &&
-            (ativo == true || _showInactive);
+            (ativo == true || _mostrarInativos);
       }).toList();
     });
   }
 
   void _toggleInactive(bool showInactive) {
     setState(() {
-      _showInactive = showInactive;
+      _mostrarInativos = showInactive;
       _filterFuncionarios('');
     });
   }
@@ -90,7 +115,7 @@ class _ConsultaDeFuncionarioState extends State<ConsultaDeFuncionario> {
               children: [
                 Text('Mostrar inativos'),
                 Switch(
-                  value: _showInactive,
+                  value: _mostrarInativos,
                   onChanged: _toggleInactive,
                 ),
               ],
@@ -114,13 +139,16 @@ class _ConsultaDeFuncionarioState extends State<ConsultaDeFuncionario> {
                         Text('Whatsapp: ${funcionario['pessoa']['whatsapp']}'),
                       ],
                     ),
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => FuncionarioDetalhes(funcionario: funcionario),
                         ),
                       );
+                      if (result == true) {
+                        _fetchFuncionarios(); // Refresh the list after returning
+                      }
                     },
                   ),
                 );

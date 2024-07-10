@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:pi/widgets/cadastro/tecnico_dropdown.dart';
+import 'package:pi/widgets/imagens/image_gallery.dart';
+import 'package:pi/widgets/mapa_localizacao.dart';
 import 'package:pi/widgets/textFormFieldGenerico.dart';
 import 'package:pi/widgets/tipo_servico.dart';
 import 'package:pi/widgets/scaffold_base.dart';
@@ -32,6 +34,9 @@ class _OrdemDetalhesState extends State<OrdemDetalhes> {
   List<File> _selectedFiles = [];
   List<String> _imageUrls = [];
   String? _token;
+  String? _tecnicoSelecionado;
+  double _latitude = 0;
+  double _longitude = 0;
 
   @override
   void initState() {
@@ -42,6 +47,11 @@ class _OrdemDetalhesState extends State<OrdemDetalhes> {
     _tipoServicoSelecionado = widget.ordem['tipo_servico'];
     _dataPrevisao = widget.ordem['data_previsao'] != null ? DateTime.parse(widget.ordem['data_previsao']) : null;
     _imageUrls = List<String>.from(widget.imageUrls);
+    _tecnicoSelecionado = widget.ordem['funcionarioNome'];
+    final localizacao = widget.ordem['localizacao'] ?? '';
+    final coords = localizacao.split(',');
+    _latitude = coords.length > 0 ? double.tryParse(coords[0]) ?? 0.0 : 0.0;
+    _longitude = coords.length > 1 ? double.tryParse(coords[1]) ?? 0.0 : 0.0;
     _loadToken();
   }
 
@@ -78,8 +88,9 @@ class _OrdemDetalhesState extends State<OrdemDetalhes> {
         Uri.parse('${BackendUrls().updateOrdemServicoTecnico()}'),
       )
         ..headers['Authorization'] = 'Bearer $_token'
-        ..fields['id'] = widget.ordem['id'].toString()
+        ..fields['id'] = widget.ordem['id']
         ..fields['status'] = widget.ordem['status'].toString()
+        ..fields['funcionarioNome'] = _tecnicoSelecionado!
         ..fields['clienteNome'] = _clienteNomeController.text
         ..fields['tipo_servico'] = _tipoServicoSelecionado ?? ''
         ..fields['descricao_problema'] = _descricaoController.text
@@ -93,21 +104,19 @@ class _OrdemDetalhesState extends State<OrdemDetalhes> {
       final response = await request.send();
 
       if (response.statusCode == 200) {
-        Get.back(result: true);
+        _showSuccessScreen();
       } else {
-        throw Exception('Failed to update order');
+        _showErrorScreen('Falha ao salvar a ordem de serviço');
       }
     }
   }
 
   Future<void> _selectImages() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _selectedFiles.add(File(pickedFile.path));
-      });
-    }
+    final pickedFiles = await picker.pickMultiImage();
+    setState(() {
+      _selectedFiles.addAll(pickedFiles.map((pickedFile) => File(pickedFile.path)).toList());
+    });
   }
 
   Future<void> _deleteImage(String imageUrl) async {
@@ -217,7 +226,16 @@ class _OrdemDetalhesState extends State<OrdemDetalhes> {
   }
 
   Widget _buildFileImagePreview(File imageFile) {
-    return Stack(
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FullScreenImage(imageProvider: FileImage(imageFile)),
+        ),
+      );
+    },
+    child: Stack(
       children: [
         Container(
           margin: EdgeInsets.all(8.0),
@@ -244,95 +262,165 @@ class _OrdemDetalhesState extends State<OrdemDetalhes> {
           ),
         ),
       ],
+    ),
+  );
+}
+
+
+  void _showSuccessScreen() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        Future.delayed(Duration(seconds: 2), () {
+          Navigator.of(context).pop(true);
+          Navigator.of(context).pop();
+        });
+        return AlertDialog(
+          backgroundColor: Colors.green,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text(
+                'Ordem de serviço atualizada com sucesso!',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showErrorScreen(String errorMessage) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        Future.delayed(Duration(seconds: 2), () {
+          Navigator.of(context).pop();
+        });
+        return AlertDialog(
+          backgroundColor: Colors.red,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text(
+                'Falha ao atualizar a ordem de serviço',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                errorMessage,
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return ScaffoldBase(
-      title: 'Detalhes da Ordem',
-      body: _token == null
-          ? Center(child: CircularProgressIndicator())
-          : Form(
-              key: _formKey,
-              child: ListView(
-                padding: EdgeInsets.all(16.0),
-                children: [
-                  TextFormFieldGenerico(
-                    controller: _clienteNomeController,
-                    label: 'Nome do Cliente',
-                    validationMessage: 'Por favor, insira o nome do cliente',
-                    enabled: _isEditing,
+Widget build(BuildContext context) {
+  return ScaffoldBase(
+    title: 'Detalhes da Ordem',
+    body: _token == null
+        ? Center(child: CircularProgressIndicator())
+        : Form(
+            key: _formKey,
+            child: ListView(
+              padding: EdgeInsets.all(16.0),
+              children: [
+                TextFormFieldGenerico(
+                  controller: _clienteNomeController,
+                  label: 'Nome do Cliente',
+                  validationMessage: 'Por favor, insira o nome do cliente',
+                  enabled: _isEditing,
+                ),
+                _isEditing
+                    ? TecnicoDropdown(
+                        isEditing: _isEditing,
+                        onTecnicoSelected: (String tecnico) {
+                          setState(() {
+                            _tecnicoSelecionado = tecnico;
+                          });
+                        },
+                      )
+                    : ListTile(
+                        title: Text('Técnico Responsável'),
+                        subtitle: Text(_tecnicoSelecionado ?? 'Nenhum técnico selecionado'),
+                      ),
+                SizedBox(height: 16.0),
+                TextFormFieldGenerico(
+                  controller: _descricaoController,
+                  label: 'Descrição do Problema',
+                  validationMessage: 'Por favor, insira a descrição do problema',
+                  enabled: _isEditing,
+                ),
+                SizedBox(height: 16.0),
+                _isEditing
+                    ? TipoServicoDropdown(
+                        tipoServicoSelecionado: _tipoServicoSelecionado,
+                        enabled: true,
+                        onChanged: (newValue) {
+                          setState(() {
+                            _tipoServicoSelecionado = newValue;
+                          });
+                        },
+                      )
+                    : ListTile(
+                        title: Text('Tipo de Serviço'),
+                        subtitle: Text(_tipoServicoSelecionado ?? 'Nenhum tipo selecionado'),
+                      ),
+                SizedBox(height: 16.0),
+                TextFormFieldGenerico(
+                  controller: _produtoExtraController,
+                  label: 'Produto Extra',
+                  validationMessage: 'Por favor, insira o produto extra',
+                  enabled: _isEditing,
+                ),
+                SizedBox(height: 16.0),
+                ListTile(
+                  title: Text('Data de Previsão'),
+                  subtitle: Text(
+                    _dataPrevisao != null ? DateFormat('dd-MM-yyyy').format(_dataPrevisao!) : 'Nenhuma data selecionada',
                   ),
-                  SizedBox(height: 16.0),
-                  TextFormFieldGenerico(
-                    controller: _descricaoController,
-                    label: 'Descrição do Problema',
-                    validationMessage: 'Por favor, insira a descrição do problema',
-                    enabled: _isEditing,
-                  ),
-                  SizedBox(height: 16.0),
-                  _isEditing
-                      ? TipoServicoDropdown(
-                          tipoServicoSelecionado: _tipoServicoSelecionado,
-                          enabled: true,
-                          onChanged: (newValue) {
-                            setState(() {
-                              _tipoServicoSelecionado = newValue;
-                            });
-                          },
-                        )
-                      : ListTile(
-                          title: Text('Tipo de Serviço'),
-                          subtitle: Text(_tipoServicoSelecionado ?? 'Nenhum tipo selecionado'),
-                        ),
-                  SizedBox(height: 16.0),
-                  TextFormFieldGenerico(
-                    controller: _produtoExtraController,
-                    label: 'Produto Extra',
-                    validationMessage: 'Por favor, insira o produto extra',
-                    enabled: _isEditing,
-                  ),
-                  SizedBox(height: 16.0),
-                  ListTile(
-                    title: Text('Data de Previsão'),
-                    subtitle: Text(
-                      _dataPrevisao != null ? DateFormat('dd-MM-yyyy').format(_dataPrevisao!) : 'Nenhuma data selecionada',
-                    ),
-                    trailing: _isEditing ? Icon(Icons.calendar_today) : null,
-                    onTap: _isEditing ? () => _selectDate(context) : null,
-                  ),
-                  SizedBox(height: 16.0),
-                  if (_isEditing)
-                    ElevatedButton(
-                      onPressed: _selectImages,
-                      child: Text('Selecionar Imagens'),
-                    ),
-                  SizedBox(height: 16.0),
-                  Wrap(
-                    children: [
-                      ..._imageUrls.map((imageUrl) => _buildNetworkImagePreview(imageUrl)).toList(),
-                      ..._selectedFiles.map((file) => _buildFileImagePreview(file)).toList(),
-                    ],
-                  ),
-                  SizedBox(height: 16.0),
-                  if (_isEditing)
-                    ElevatedButton(
-                      onPressed: _updateOrdem,
-                      child: Text('Salvar'),
-                    ),
-                  SizedBox(height: 16.0),
+                  trailing: _isEditing ? Icon(Icons.calendar_today) : null,
+                  onTap: _isEditing ? () => _selectDate(context) : null,
+                ),
+                SizedBox(height: 16.0),
+                if (_isEditing)
                   ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _isEditing = !_isEditing;
-                      });
-                    },
-                    child: Text(_isEditing ? 'Cancelar' : 'Editar'),
+                    onPressed: _selectImages,
+                    child: Text('Selecionar Imagens'),
                   ),
-                ],
-              ),
+                if (_latitude != 0.0 && _longitude != 0.0)
+                  MapaLocalizacao(latitude: _latitude, longitude: _longitude),
+                SizedBox(height: 16.0),
+                ImageGallery(orderId: widget.ordem['id']),
+                SizedBox(height: 16.0),
+                if (_isEditing)
+                  ElevatedButton(
+                    onPressed: _updateOrdem,
+                    child: Text('Salvar'),
+                  ),
+                SizedBox(height: 16.0),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _isEditing = !_isEditing;
+                    });
+                  },
+                  child: Text(_isEditing ? 'Cancelar' : 'Editar'),
+                ),
+              ],
             ),
-    );
-  }
+          ),
+  );
+}
+
 }
