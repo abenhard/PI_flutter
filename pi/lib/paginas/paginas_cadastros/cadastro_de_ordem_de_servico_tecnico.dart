@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pi/widgets/cadastro/search_cliente.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
@@ -33,7 +35,9 @@ class _CadastroDeOrdemDeServicoTecnico
   DateTime? _dataPrevisao;
   Position? _currentPosition;
   List<File> _selectedFiles = [];
-  Future<http.Response>? _futureResponse;
+  bool _isLoading = false;
+  String? _submitStatusMessage;
+  bool _isSubmitSuccess = false;
 
   @override
   void dispose() {
@@ -64,7 +68,7 @@ class _CadastroDeOrdemDeServicoTecnico
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Location services are disabled.')),
+        const SnackBar(content: Text('Serviço de localização está desativado, por favor reative.')),
       );
       return;
     }
@@ -74,7 +78,7 @@ class _CadastroDeOrdemDeServicoTecnico
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Location permissions are denied.')),
+          const SnackBar(content: Text('Sem permissão de localização, por favor mude as permissões.')),
         );
         return;
       }
@@ -84,7 +88,7 @@ class _CadastroDeOrdemDeServicoTecnico
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text(
-                'Location permissions are permanently denied, we cannot request permissions.')),
+                'Permissão de localização negada permanentemente, por favor mude as permissões.')),
       );
       return;
     }
@@ -101,21 +105,25 @@ class _CadastroDeOrdemDeServicoTecnico
   }
 
   Future<void> _submitForm() async {
-    print('Botao apertado');
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      print('Form validated');
       await _getCurrentLocation();
       setState(() {
-        _futureResponse = cadastrarOrdem();
+        _isLoading = true;
+        _submitStatusMessage = null;
       });
-    } else {
-      print('Form validation failed');
+      final response = await cadastrarOrdem();
+      setState(() {
+        _isLoading = false;
+        _isSubmitSuccess = response.statusCode == 200;
+        _submitStatusMessage = _isSubmitSuccess
+            ? 'Ordem de serviço cadastrada com sucesso!'
+            : 'Erro ao cadastrar ordem de serviço: ${response.body}';
+      });
     }
   }
 
   Future<http.Response> cadastrarOrdem() async {
-    print('Sending request to backend');
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('jwt_token');
 
@@ -158,6 +166,16 @@ class _CadastroDeOrdemDeServicoTecnico
     return http.Response.fromStream(response);
   }
 
+  Future<File> compressImage(File file) async {
+    final tempDir = await getTemporaryDirectory();
+    final path = tempDir.path;
+    final image = img.decodeImage(file.readAsBytesSync());
+    final compressedImage = img.encodeJpg(image!, quality: 85);
+    final compressedFile = File('$path/${file.uri.pathSegments.last}');
+    await compressedFile.writeAsBytes(compressedImage);
+    return compressedFile;
+  }
+
   Future<void> _selectImages() async {
     final List<String> options = ['Camera', 'Gallery'];
     final picker = ImagePicker();
@@ -187,8 +205,9 @@ class _CadastroDeOrdemDeServicoTecnico
         }
         if (pickedFile != null) {
           final path = pickedFile.path;
+          final compressedFile = await compressImage(File(path));
           setState(() {
-            _selectedFiles.add(File(path));
+            _selectedFiles.add(compressedFile);
           });
         }
       }
@@ -230,12 +249,8 @@ class _CadastroDeOrdemDeServicoTecnico
   Widget build(BuildContext context) {
     return ScaffoldBase(
       title: 'Ordem de Serviço',
-      body: FutureBuilder<http.Response>(
-        future: _futureResponse,
-        builder:
-            (BuildContext context, AsyncSnapshot<http.Response> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+      body: _isLoading
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -247,17 +262,21 @@ class _CadastroDeOrdemDeServicoTecnico
                   ),
                 ],
               ),
-            );
-          } else if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasError) {
-              return _buildErrorScreen();
-            } else if (snapshot.hasData) {
-              return _buildResponseScreen(snapshot.data!);
-            }
-          }
-          return _buildForm();
-        },
-      ),
+            )
+          : _submitStatusMessage != null
+              ? Center(
+                  child: Container(
+                    color: _isSubmitSuccess ? Colors.green : Colors.red,
+                    child: Center(
+                      child: Text(
+                        _submitStatusMessage!,
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                )
+              : _buildForm(),
     );
   }
 
@@ -268,127 +287,68 @@ class _CadastroDeOrdemDeServicoTecnico
         key: _formKey,
         child: ListView(
           children: <Widget>[
-            SearchClientes(             
+            SearchClientes(
               onClienteSelected: (cpf) {
-              setState(() {
-                _clienteSelecionado = cpf;
-              });
-            }),
+                setState(() {
+                  _clienteSelecionado = cpf;
+                });
+              },
+            ),
             const SizedBox(height: 20),
             TextFormFieldGenerico(
-              controller:  _descricaoController,
-              label:  'Descrição',
-              validationMessage:  'Digite uma breve descrição do problema relatado pelo cliente.',
+              controller: _descricaoController,
+              label: 'Descrição',
+              validationMessage:
+                  'Digite uma breve descrição do problema relatado pelo cliente.',
               keyboardType: TextInputType.text,
-              
             ),
             const SizedBox(height: 20),
             TipoServicoDropdown(
+              enabled: true,
+              tipoServicoSelecionado: _tipoServicoSelecionado,
               onChanged: (valorSelecionado) {
                 setState(() {
                   _tipoServicoSelecionado = valorSelecionado;
                 });
               },
-              tipoServicoSelecionado: _tipoServicoSelecionado,
-              enabled: true,
             ),
             const SizedBox(height: 20),
-            TextFormFieldGenerico(
-              controller: _relatorioTecnicoController,
-              label:'Relatório Técnico',
-              validationMessage:'Digite os principais quais problemas encontrados e ação necessária para o conserto.',
+            ElevatedButton(
+              onPressed: () => _selectDate(context),
+              child: Text(_dataPrevisao == null
+                  ? 'Selecionar Data de Previsão'
+                  : 'Data Selecionada: ${DateFormat('dd/MM/yyyy').format(_dataPrevisao!)}'),
             ),
             const SizedBox(height: 20),
             TextFormFieldGenerico(
               controller: _produtoExtraController,
-              label:'Produto Extra',
-              validationMessage:'Digite se necessário, qual(s) produto(s) necessário(s) para o conserto.',
+              label: 'Produto Extra',
+              validationMessage: 'Digite o produto utilizado ou necessário.',
+              keyboardType: TextInputType.text,
             ),
             const SizedBox(height: 20),
-            ListTile(
-              title: Text(              
-                _dataPrevisao == null
-                    ? 'Selecione um Dia para previsão de entrega'
-                    : 'Data prevista para entrega: ${_dataPrevisao!.toLocal().toString().split(' ')[0]}',
-              ),
-              trailing: Icon(Icons.calendar_today),
-              onTap: () => _selectDate(context),
+            TextFormFieldGenerico(
+              controller: _relatorioTecnicoController,
+              label: 'Relatório Técnico',
+              validationMessage: 'Digite o relatorio técnico.',
+              keyboardType: TextInputType.text,
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
+            TextButton(
               onPressed: _selectImages,
-              child: const Text('Selecionar Imagens'),
+              child: const Text('Adicionar Fotos'),
             ),
             const SizedBox(height: 20),
             Wrap(
-              children: _selectedFiles.map((file) => _buildImagePreview(file)).toList(),
+              children: _selectedFiles.map(_buildImagePreview).toList(),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _submitForm,
-              child: const Text('Cadastrar Ordem de Serviço'),
+              child: const Text('Cadastrar Ordem'),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildResponseScreen(http.Response response) {
-    if (response.statusCode == 200) {
-      return _buildSuccessScreen();
-    } else {
-      return _buildErrorScreen(response.body);
-    }
-  }
-
-  Widget _buildSuccessScreen() {
-    Future.delayed(Duration(seconds: 3), () {
-      Navigator.pop(context);
-    });
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.check_circle, color: Colors.green, size: 100),
-          SizedBox(height: 20),
-          Text(
-            'ORDEM DE SERVIÇO CADASTRADA COM SUCESSO',
-            style: TextStyle(fontSize: 18, color: Colors.green),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorScreen([String? message]) {
-    Future.delayed(Duration(seconds: 3), () {
-      setState(() {
-        _futureResponse = null;
-      });
-    });
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error, color: Colors.red, size: 100),
-          SizedBox(height: 20),
-          Text(
-            'FALHA AO CADASTRAR ORDEM DE SERVIÇO',
-            style: TextStyle(fontSize: 18, color: Colors.red),
-          ),
-          if (message != null)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                message,
-                style: TextStyle(fontSize: 16, color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-            ),
-        ],
       ),
     );
   }

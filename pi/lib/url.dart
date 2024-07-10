@@ -18,6 +18,10 @@ class BackendUrls {
   String getPessoas() {
     return '$httpBase' + 'pessoa';
   }
+  String getClientes(){
+    return '${getPessoas()}/clientes';
+  }
+
   String getPessoaCPF(String cpf){
     return '$httpBase' + 'pessoa/$cpf';
   }
@@ -65,8 +69,7 @@ class BackendUrls {
   String ordemServicoDetalhes(ordem) {
     return getOrdem() + '';
   }
-
   String getOrdemServicoImagens(ordem) {
-    return getOrdem() +  '/{$ordem}/images';
+    return '$httpBase' + 'imagens' +  '/' + ordem.toString();
   }
 }

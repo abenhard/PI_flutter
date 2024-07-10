@@ -30,6 +30,7 @@ class _FuncionarioDetalhesState extends State<FuncionarioDetalhes> {
   late TextEditingController estadoController;
   late TextEditingController cargoController;
   bool ativo = false;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -38,9 +39,6 @@ class _FuncionarioDetalhesState extends State<FuncionarioDetalhes> {
     final funcionario = widget.funcionario ?? {};
     final pessoa = funcionario['pessoa'] ?? {};
     final cargo = funcionario['funcionario']?['cargo'] ?? {};
-
-    print('Funcionario: ${widget.funcionario}');
-    print('Pessoa: $pessoa');
 
     nomeController = TextEditingController(text: pessoa['nome'] ?? '');
     emailController = TextEditingController(text: pessoa['email'] ?? '');
@@ -83,18 +81,20 @@ class _FuncionarioDetalhesState extends State<FuncionarioDetalhes> {
   }
 
   Future<void> _submitForm() async {
+    setState(() {
+      isLoading = true;
+    });
+
     final response = await _updateFuncionario();
+
+    setState(() {
+      isLoading = false;
+    });
+
     if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Funcionario atualizado com sucesso!')),
-      );
-      setState(() {
-        isEditing = false;
-      });
+      _showSuccessScreen();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao atualizar funcionario: ${response.body}')),
-      );
+      _showErrorScreen(response.body);
     }
   }
 
@@ -136,126 +136,199 @@ class _FuncionarioDetalhesState extends State<FuncionarioDetalhes> {
     );
   }
 
+  void _showSuccessScreen() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        Future.delayed(Duration(seconds: 2), () {
+          Navigator.of(context).pop(true); 
+          Navigator.of(context).pop(); 
+        });
+        return AlertDialog(
+          backgroundColor: Colors.green,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text(
+                'Cadastro alterado com sucesso!',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showErrorScreen(String errorMessage) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        Future.delayed(Duration(seconds: 2), () {
+          Navigator.of(context).pop(); 
+        });
+        return AlertDialog(
+          backgroundColor: Colors.red,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text(
+                'Falha ao atualizar o cadastro',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                errorMessage,
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScaffoldBase(
       title: 'Detalhes do Funcionário',
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ListView(
               children: [
-                Text(
-                  'Detalhes do Funcionário',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Detalhes do Funcionário',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),             
+                  ],
                 ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: nomeController,
+                  decoration: InputDecoration(labelText: 'Nome'),
+                  enabled: isEditing,
+                ),
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(labelText: 'Email'),
+                  enabled: isEditing,
+                ),
+                TextField(
+                  controller: telefoneController,
+                  decoration: InputDecoration(labelText: 'Telefone'),
+                  enabled: isEditing,
+                ),
+                TextField(
+                  controller: whatsappController,
+                  decoration: InputDecoration(labelText: 'Whatsapp'),
+                  enabled: isEditing,
+                ),
+                TextField(
+                  controller: cpfController,
+                  decoration: InputDecoration(labelText: 'CPF'),
+                  enabled: isEditing,
+                ),
+                TextField(
+                  controller: ruaController,
+                  decoration: InputDecoration(labelText: 'Rua'),
+                  enabled: isEditing,
+                ),
+                TextField(
+                  controller: bairroController,
+                  decoration: InputDecoration(labelText: 'Bairro'),
+                  enabled: isEditing,
+                ),
+                TextField(
+                  controller: complementoController,
+                  decoration: InputDecoration(labelText: 'Complemento'),
+                  enabled: isEditing,
+                ),
+                TextField(
+                  controller: cepController,
+                  decoration: InputDecoration(labelText: 'CEP'),
+                  enabled: isEditing,
+                ),
+                TextField(
+                  controller: numeroController,
+                  decoration: InputDecoration(labelText: 'Número'),
+                  enabled: isEditing,
+                ),
+                TextField(
+                  controller: cidadeController,
+                  decoration: InputDecoration(labelText: 'Cidade'),
+                  enabled: isEditing,
+                ),
+                TextField(
+                  controller: estadoController,
+                  decoration: InputDecoration(labelText: 'Estado'),
+                  enabled: isEditing,
+                ),
+                TextField(
+                  controller: cargoController,
+                  decoration: InputDecoration(labelText: 'Cargo'),
+                  enabled: isEditing,
+                ),
+                SwitchListTile(
+                  title: const Text('Ativo'),
+                  value: ativo,
+                  onChanged: isEditing
+                      ? (bool value) {
+                          setState(() {
+                            ativo = value;
+                          });
+                          if (!value) {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Aviso'),
+                                  content: const Text('Você está desativando este funcionário.'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text('OK'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                        }
+                      : null,
+                  secondary: const Icon(Icons.warning, color: Colors.red),
+                ),
+                SizedBox(height: 16.0),
                 ElevatedButton(
-                  onPressed: isEditing ? _submitForm : toggleEditing,
-                  child: Text(isEditing ? 'Salvar' : 'Editar'),
-                ),
+                      onPressed: isEditing ? _submitForm : toggleEditing,
+                      child: Text(isEditing ? 'Salvar' : 'Editar'),
+                    ),
               ],
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: nomeController,
-              decoration: InputDecoration(labelText: 'Nome'),
-              enabled: isEditing,
+          ),
+          if (isLoading)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Aguarde...'),
+                ],
+              ),
             ),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-              enabled: isEditing,
-            ),
-            TextField(
-              controller: telefoneController,
-              decoration: InputDecoration(labelText: 'Telefone'),
-              enabled: isEditing,
-            ),
-            TextField(
-              controller: whatsappController,
-              decoration: InputDecoration(labelText: 'Whatsapp'),
-              enabled: isEditing,
-            ),
-            TextField(
-              controller: cpfController,
-              decoration: InputDecoration(labelText: 'CPF'),
-              enabled: isEditing,
-            ),
-            TextField(
-              controller: ruaController,
-              decoration: InputDecoration(labelText: 'Rua'),
-              enabled: isEditing,
-            ),
-            TextField(
-              controller: bairroController,
-              decoration: InputDecoration(labelText: 'Bairro'),
-              enabled: isEditing,
-            ),
-            TextField(
-              controller: complementoController,
-              decoration: InputDecoration(labelText: 'Complemento'),
-              enabled: isEditing,
-            ),
-            TextField(
-              controller: cepController,
-              decoration: InputDecoration(labelText: 'CEP'),
-              enabled: isEditing,
-            ),
-            TextField(
-              controller: numeroController,
-              decoration: InputDecoration(labelText: 'Número'),
-              enabled: isEditing,
-            ),
-            TextField(
-              controller: cidadeController,
-              decoration: InputDecoration(labelText: 'Cidade'),
-              enabled: isEditing,
-            ),
-            TextField(
-              controller: estadoController,
-              decoration: InputDecoration(labelText: 'Estado'),
-              enabled: isEditing,
-            ),
-            TextField(
-              controller: cargoController,
-              decoration: InputDecoration(labelText: 'Cargo'),
-              enabled: isEditing,
-            ),
-            SwitchListTile(
-              title: const Text('Ativo'),
-              value: ativo,
-              onChanged: isEditing
-                  ? (bool value) {
-                      setState(() {
-                        ativo = value;
-                      });
-                      if (!value) {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text('Aviso'),
-                              content: const Text('Você está desativando este funcionário.'),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-                    }
-                  : null,
-              secondary: const Icon(Icons.warning, color: Colors.red),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

@@ -28,7 +28,7 @@ class _BuscarClienteState extends State<BuscarCliente> {
       String? token = prefs.getString('jwt_token');
 
       final response = await http.get(
-        Uri.parse('${BackendUrls().getPessoas()}?query=$query'),
+        Uri.parse('${BackendUrls().getClientes()}?query=$query'),
         headers: {
           'Authorization': 'Bearer $token',
         },
@@ -43,10 +43,10 @@ class _BuscarClienteState extends State<BuscarCliente> {
           }).toList();
         });
       } else {
-        // Handle other status codes
+        // erros
       }
     } catch (e) {
-      // Handle errors
+      // erros
     } finally {
       setState(() {
         _isLoading = false;

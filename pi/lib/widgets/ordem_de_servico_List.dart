@@ -172,27 +172,36 @@ class _OrdemDeServicoListState extends State<OrdemDeServicoList> with RouteAware
                 final order = filteredOrders[index];
                 final clienteNome = order['clienteNome'] ?? 'Nome desconhecido';
                 final clienteCPF = order['clienteCPF'] ?? 'CPF desconhecido';
+                final tecnicoResponsavel = order['funcionarioNome'] ?? 'Tecnico desconhecido';
                 final tipoServico = order['tipo_servico'] ?? 'Tipo de serviço desconhecido';
-                final dataCriacao = order['data_criacao'] ?? 'Data de criação desconhecida';
+                final dataCriacao = order['data_criacao'] ?? 'Data desconhecida';
+                final dataPrevisao = order['data_previsao'] ?? 'Data desconhecida';
                 final descricaoProblema = order['descricao_problema'] ?? 'Descrição desconhecida';
-                final status = order['status'] ?? 'Status desconhecido';
+                final status = order['status'].toString();
                 final List<String> imageUrls = order['imageUrls'] != null ? List<String>.from(order['imageUrls']) : [];
 
                 // Format the date
-                final formattedDate = dataCriacao != 'Data de criação desconhecida'
-                    ? DateFormat('dd-MM-yyyy').format(DateTime.parse(dataCriacao))
-                    : dataCriacao;
+                formataData(dynamic data){
+                  if(data != 'Data desconhecida'){
+                     return DateFormat('dd-MM-yyyy').format(DateTime.parse(data));
+                  }
+                  else{
+                    return 'Data desconhecida';
+                  } 
+                } 
 
                 return Card(
                   margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                   child: ListTile(
-                    title: Text(clienteNome),
+                    title: Text('Cliente: $clienteNome'),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('CPF: $clienteCPF'),
+                        Text('Tecnico Responsável: $tecnicoResponsavel'),
                         Text('Tipo de Serviço: $tipoServico'),
-                        Text('Data de Criação: $formattedDate'),
+                        Text('Data de Criação: ${formataData(dataCriacao)}'),
+                        Text('Data prevista de entrega: ${formataData(dataPrevisao)}'),
                         Text('Descrição: $descricaoProblema'),
                         Text('Status: $status'),
                       ],

@@ -50,16 +50,68 @@ class _ClienteDetalhesState extends State<ClienteDetalhes> {
         setState(() {
           _isEditing = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Atualização realizada com sucesso')),
-        );
+        _showSuccessScreen();
       } else {
-        // Handle error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Falha ao atualizar dados')),
-        );
+        _showErrorScreen(response.body);
       }
     }
+  }
+
+  void _showSuccessScreen() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        Future.delayed(Duration(seconds: 2), () {
+          Navigator.of(context).pop(true); 
+          Navigator.of(context).pop(); 
+        });
+        return AlertDialog(
+          backgroundColor: Colors.green,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text(
+                'Cadastro alterado com sucesso!',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showErrorScreen(String errorMessage) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        Future.delayed(Duration(seconds: 2), () {
+          Navigator.of(context).pop(); 
+        });
+        return AlertDialog(
+          backgroundColor: Colors.red,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text(
+                'Falha ao atualizar o cadastro',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                errorMessage,
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
